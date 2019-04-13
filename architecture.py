@@ -93,7 +93,7 @@ class A2CPolicy(object):
         # Function use to take a step returns action to take and V(s)
         def step(state_in, *_args, **_kwargs):
             sl,action, value= sess.run([softmax_layer,a0, vf], {inputs_: state_in})
-            print(sl)
+            #print(sl)
 
 
             # max=-1
