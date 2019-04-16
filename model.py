@@ -289,7 +289,7 @@ def learn(policy,
           ent_coef,
           lr,
           max_grad_norm,
-          log_interval):
+          log_interval,save_interval):
     noptepochs = 4
     nminibatches = 8
 
@@ -406,9 +406,12 @@ def learn(policy,
             logger.record_tabular("total_loss",float(float(lossvalues[0]) - float(lossvalues[2]) * ent_coef + float(lossvalues[1]) * vf_coef))
             logger.dump_tabular()
 
+        if update % save_interval == 0 or update==1:
             savepath = "./models/" + str(update) + "/model.ckpt"
+
             model.save(savepath)
             print('Saving to', savepath)
+
 
     env.close()
 
