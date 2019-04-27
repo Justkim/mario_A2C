@@ -336,7 +336,6 @@ def learn(policy,
     # model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
-
     # Start total timer
     tfirststart = time.time()
     for update in range(1, total_timesteps // batch_size + 1):
@@ -434,7 +433,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/600/model.ckpt"
+    load_path = "./models/200/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
