@@ -93,7 +93,8 @@ class Model(object):
         # Entropy is used to improve exploration by limiting the premature convergence to suboptimal policy.
         # entropy = tf.reduce_mean(train_model.pd.entropy())
         entropy=tf.reduce_mean(train_model.dist.entropy(name="ent"))
-        vf_loss=0.0
+        vf_loss=tf.zeros(vf_loss.shape,dtype=tf.dtypes.float32)
+
         loss = pg_loss - entropy * ent_coef + vf_loss * vf_coef
 
         # Update parameters using loss
