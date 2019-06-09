@@ -5,6 +5,7 @@ import os.path as osp
 import tensorflow as tf
 from baselines import logger
 
+
 import cv2
 
 import matplotlib.pyplot as plt
@@ -39,6 +40,8 @@ class Model(object):
     - Save load the model
     """
 
+
+
     def __init__(self,
                  policy,
                  ob_space,
@@ -49,8 +52,9 @@ class Model(object):
                  vf_coef,
                  max_grad_norm):
         sess = tf.get_default_session()
-        # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+        # sess = tf_debug.LocalCLIDebugWrapperSessionp.array([[1, 1], [2, 2], [3, 3]], dtype=np.float32)n(sess)
         # Here we create the placeholders
+
         timestr = time.strftime("%Y%m%d-%H%M%S")
         dirname="./"+timestr+"log"
         logger.configure(dir=dirname)
@@ -58,6 +62,7 @@ class Model(object):
         advantages_ = tf.placeholder(tf.float32, [None], name="advantages_")
         rewards_ = tf.placeholder(tf.float32, [None], name="rewards_")
         lr_ = tf.placeholder(tf.float32, name="learning_rate_")
+
 
         # Here we create our two models:
         # Step_model that is used for sampling
@@ -72,10 +77,26 @@ class Model(object):
         """
         # Policy loss
         # Output -log(pi)
+        l1=[]
+        # print(actions_.shape)
+        #
+        # actions_copy=tf.identity(actions_)
+        #
+        # for i in range(0-0.01],actions_copy.shape):
+        #     actions_copy[i]=train_model.softmax_layer[actions_copy[i]]
+        #
+        #
+        #
+        #     result = recursive_map(actions_copy)
+
+
+
 
         # neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
+
         neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
+        # neglogpac=train_model.pd.neglogp(actions_)
 
 
         #neglogpac=train_model.pd.neglogp(actions_)
@@ -93,9 +114,9 @@ class Model(object):
         # Entropy is used to improve exploration by limiting the premature convergence to suboptimal policy.
         # entropy = tf.reduce_mean(train_model.pd.entropy())
         entropy=tf.reduce_mean(train_model.dist.entropy(name="ent"))
-        vf_loss=tf.zeros(vf_loss.shape,dtype=tf.dtypes.float32)
+        # vf_loss=tf.zeros(vf_loss.shape,dtype=tf.float32)
 
-        loss = pg_loss - entropy * ent_coef + vf_loss * vf_coef
+        loss = pg_loss - (entropy * ent_coef) + (vf_loss * vf_coef)
 
         # Update parameters using loss
         # 1. Get the model parameters
@@ -107,6 +128,7 @@ class Model(object):
             # Clip the gradients (normalize)
             grads, grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
         grads = list(zip(grads, params))
+
         # zip aggregate each gradient with parameters associated
         # For instance zip(ABCD, xyza) => Ax, By, Cz, Da
 
@@ -114,13 +136,17 @@ class Model(object):
         trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
 
         # 4. Backpropagation
-        _train = trainer.apply_gradients(grads)
 
+        _train = trainer.apply_gradients(grads)
         def train(states_in, actions, returns, values, lr):
             # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
             # Returns = R + yV(s')
 
             advantages = returns - values
+
+            # print(advantages.shape)
+            # print(actions_.shape)
+            # exit
 
             # We create the feed dictionary
             td_map = {train_model.inputs_: states_in,
@@ -129,23 +155,10 @@ class Model(object):
                       rewards_: returns,  # Use as a bootstrap for real value
                       lr_: lr}
 
-            policy_loss, value_loss, policy_entropy, _ = sess.run([pg_loss, vf_loss, entropy, _train], td_map)
-
-            # print("TRAIN")
-            # print("pi shape: ", pi1.shape)
-            # print("pi: ", pi1)
-            # print("pd: ",list(train_model.pd))
-            # print("adv is: ",adv)
-            # print("neglog is: ",neglog)
-            # print("value loss: ",value_loss)
-            # print("policy loss: ",policy_loss)
-            # print("policy entropy: ",policy_entropy)
-            # print("TOTAL LOSS: ", loss1)
-            # print("--------------")
-
-
-
-
+            pi1,policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,pg_loss,neglogpac,vf_loss, entropy, _train], td_map)
+            print("pd",pi1)
+            logger.record_tabular("neglog", neglogpac1)
+            logger.record_tabular("adv", advantages)
 
             return policy_loss, value_loss, policy_entropy
 
@@ -166,10 +179,14 @@ class Model(object):
 
         self.train = train
         self.train_model = train_model
-        self.step_model = step_model
+        # self.step_model = step_model
+
+        self.step_model = train_model
         self.step = step_model.step
         self.value = step_model.value
         self.initial_state = step_model.initial_state
+
+
         self.save = save
         self.load = load
         tf.global_variables_initializer().run(session=sess)
@@ -204,9 +221,9 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values = self.model.step(self.obs, self.dones)
+            step_num_to_name(actions)
             # print(tf.is_numeric_tensor(actions))
             # print(tf.is_numeric_tensor(values))
-
             # Append the observations into the mb
             mb_obs.append(np.copy(self.obs))  # obs len nenvs (1 step per env)
             # Append the actions taken into the mb
@@ -215,8 +232,18 @@ class Runner(AbstractEnvRunner):
             mb_values.append(values)
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
+
+
+            if actions[0]==7:
+                self.obs[:], rewards1, self.dones,_=self.env.step([5])
+                actions=[5]
+                if not self.dones[0]:
             # Take actions in env and look the results
-            self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+                    self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+                    rewards=rewards+rewards1
+            else:
+                self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+
             mb_rewards.append(rewards)
         # batch of steps to batch of rollouts
         mb_obs = np.asarray(mb_obs, dtype=np.uint8)
@@ -246,11 +273,11 @@ class Runner(AbstractEnvRunner):
                 # else (not done)
                 # delta = R + gamma * V(st+1)
                 nextnonterminal = 1.0 - self.dones
+                #nextnonterminal=0
                 # V(t+1)
                 nextvalues = last_values
             else:
                 nextnonterminal = 1.0 - mb_dones[t + 1]
-
                 nextvalues = mb_values[t + 1]
 
             # Delta = R(st) + gamma * V(t+1) * nextnonterminal  - V(st)
@@ -260,12 +287,15 @@ class Runner(AbstractEnvRunner):
             # print("nextnonterminal",nextnonterminal)
             # print("reward",mb_rewards[t])
             # print("mb_value",mb_values)
+            print("REWARD", mb_rewards[t])
+            print("VALUE",mb_values[t])
 
 
             delta = mb_rewards[t] + self.gamma * nextvalues * nextnonterminal - mb_values[t]
 
             # Advantage = delta + gamma *  λ (lambda) * nextnonterminal  * lastgaelam
             mb_advantages[t] = lastgaelam = delta + self.gamma * self.lam * nextnonterminal * lastgaelam
+            # mb_advantages[t] = lastgaelam = delta
 
         # Returns
         mb_returns = mb_advantages + mb_values
@@ -292,8 +322,8 @@ def learn(policy,
           lr,
           max_grad_norm,
           log_interval,save_interval):
-    noptepochs = 4
-    nminibatches = 8
+    noptepochs = 10
+    nminibatches = 8 #8
 
     # noptepochs = 1
     # nminibatches = 1
@@ -330,6 +360,7 @@ def learn(policy,
                   vf_coef=vf_coef,
                   max_grad_norm=max_grad_norm)
 
+
     # Load the model
     # If you want to continue training
     # load_path = "./models/90/model.ckpt"
@@ -350,10 +381,6 @@ def learn(policy,
         # print("return",returns)
         # print("----------")
 
-
-
-
-
         # Here what we're going to do is for each minibatch calculate the loss and append it.
         mb_losses = []
         total_batches_train = 0
@@ -365,13 +392,13 @@ def learn(policy,
         for _ in range(noptepochs):
             # Randomize the indexes
             np.random.shuffle(indices)
-
             # 0 to batch_size with batch_train_size step
             for start in range(0, batch_size, batch_train_size):
                 end = start + batch_train_size
                 mbinds = indices[start:end]
                 slices = (arr[mbinds] for arr in (obs, actions, returns, values))
                 mb_losses.append(model.train(*slices, lr))
+        print("--------------------------------------")
         # for i in mb_losses:
         #     print("mb_loss",i)
         # Feedforward --> get losses --> update
@@ -433,7 +460,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/200/model.ckpt"
+    load_path = "./models/1500/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -458,7 +485,7 @@ def play(policy, env):
         # obs, rewards, done, _ = env.step(actions)
         # print(obs[0].shape)
         # cv2.imshow("frame0",obs[0])
-        # print("reward",rewards)
+        print("reward",rewards)
         # print("steps", boom)
 
 
@@ -473,4 +500,23 @@ def play(policy, env):
     env.close()
 
 
+def step_num_to_name(step):
+    if step==0:
+        print("NONE")
+    elif step==1:
+        print('right')
+    elif step==2:
+        print('right', 'A')
+    elif step==3:
+        print('right', 'B')
+    elif step==4:
+        print('right', 'A', 'B')
+    elif step==5:
+        print('A')
+    elif step==6:
+        print('left')
+    elif step==7:
+        print("LONG JUMP")
+    elif step == 8:
+        print("LONG JUMP RIGHT")
 

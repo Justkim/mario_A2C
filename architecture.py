@@ -1,6 +1,9 @@
 import numpy as np
 import tensorflow as tf
+import baselines.common.distributions as dp
 
+import baselines.common.distributions
+from baselines.common.distributions import make_pdtype
 
 
 # This function selects the probability distribution over actions
@@ -35,10 +38,11 @@ class A2CPolicy(object):
         # This will use to initialize our kernels
         gain = np.sqrt(2)
 
+
         # Based on the action space, will select what probability distribution type
         # we will use to distribute action in our stochastic policy (in our case DiagGaussianPdType
         # aka Diagonal Gaussian, 3D normal distribution
-        self.pdtype = make_pdtype(action_space)
+        self.pdtype = dp.CategoricalPdType(7)
 
         height, weight, channel = ob_space.shape
         ob_shape = (height, weight, channel)
@@ -63,25 +67,38 @@ class A2CPolicy(object):
             conv2 = conv_layer(conv1, 64, 4, 2, gain) #4 4 32 64
             conv3 = conv_layer(conv2, 64, 3, 1, gain)# 8 64 8 8
             flatten1 = tf.layers.flatten(conv3,"FLAT") # 8 4096
-            fc_common = fc_layer(flatten1, 512,gain=gain,name1="FC512") # 8 512
-            self.p_layer=tf.layers.dense(inputs=fc_common,
-                           units=7,
+            self.fc_common = fc_layer(flatten1, 512,gain=gain,name1="FC512") # 8 512
+            self.p_layer=tf.layers.dense(inputs=self.fc_common,
+                           units=8,
                            activation=tf.nn.elu,
-                           kernel_initializer=tf.orthogonal_initializer(gain=0.01),name="p_layer"
+                           kernel_initializer=tf.contrib.layers.xavier_initializer(),name="p_layer"
                            )
+            #
+            # self.p_layer = tf.layers.dense(inputs=self.fc_common,
+            #                                units=7,
+            #                                activation=tf.nn.elu,
+            #                                kernel_initializer=tf.orthogonal_initializer(gain=0.01), name="p_layer"
+            #                                )
             # This build a fc connected layer that returns a probability distribution
             # over actions (self.pd) and our pi logits (self.pi).
             # self.pd, self.pi = self.pdtype.pdfromlatent(fc_common, init_scale=0.01)
-            softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
-            self.dist = tf.distributions.Categorical(probs=softmax_layer)
+            self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
+            self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
+            #
             a0=self.dist.sample()
             # entropy=self.dist.entropy("entropy")
 
 
+
             #tf.clip_by_value(fc_common,1e-10,1.0)-
-            # self.pd, self.pi = self.pdtype.pdfromlatent(fc_common, init_scale=0.01)
+
+            #self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
             # Calculate the v(s)
-            vf = fc_layer(fc_common, 1, activation_fn=None,name1="LASTFC")[:,0] #8 1
+
+
+            vf = fc_layer(self.fc_common, 1, activation_fn=None,name1="LASTFC")[:,0] #8 1
+
+            #a0 = self.pd.sample()
         self.initial_state = None
 
         # Take an action in the action distribution (remember we are in a situation
@@ -92,7 +109,8 @@ class A2CPolicy(object):
 
         # Function use to take a step returns action to take and V(s)
         def step(state_in, *_args, **_kwargs):
-            sl,action, value= sess.run([softmax_layer,a0, vf], {inputs_: state_in})
+            # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
+            action, value = sess.run([a0, vf], {inputs_: state_in})
             #print(sl)
 
 

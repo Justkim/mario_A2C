@@ -47,6 +47,8 @@ class PreprocessFrame(gym.ObservationWrapper):
 
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
         frame = frame[:, :, None]
+        cv2.imshow("frame",frame)
+        cv2.waitKey(0)
         return frame
 
 class ActionsDiscretizer(gym.ActionWrapper):
@@ -121,7 +123,8 @@ class AllowBacktracking(gym.Wrapper):
         # rew = max(0, self._cur_x - self._max_x)
         # self._max_x = max(self._max_x, self._cur_x)
         # # print("real reward",rew)
-        rew=(rew) * 0.01 - 0.01
+        rew=(rew) * 0.01 - 0.02
+        # rew=rew - 1
         return obs,rew, done, info
 
 
@@ -141,6 +144,8 @@ def make_env(env_idx):
     env = gym_super_mario_bros.make(levelList[env_idx])
     #SuperMarioBros-v0
     #SuperMarioBrosRandomStages
+    # env = BinarySpaceToDiscreteSpaceEnv(env,RIGHT_ONLY)
+
     env = BinarySpaceToDiscreteSpaceEnv(env, SIMPLE_MOVEMENT)
 
     # env = RewardScaler(env)
@@ -150,7 +155,7 @@ def make_env(env_idx):
 
 
     # Stack 4 frames
-    env = FrameStack(env, 4)
+    env = FrameStack(env, 6)
 
     # Allow back tracking that helps agents are not discouraged too heavily
     # from exploring backwards if there is no way to advance
@@ -240,7 +245,8 @@ def make_test():
 
     # Make the environment
     env = gym_super_mario_bros.make('SuperMarioBros-v0')
-    env = BinarySpaceToDiscreteSpaceEnv(env, SIMPLE_MOVEMENT)
+    env = BinarySpaceToDiscreteSpaceEnv(env, RIGHT_ONLY)
+    print(env.action_space)
     # Build the actions array
     # env = ActionsDiscretizer(env)
 
@@ -251,7 +257,7 @@ def make_test():
     env = PreprocessFrame(env)
 
     # Stack 4 frames
-    env = FrameStack(env, 4)
+    env = FrameStack(env, 6)
 
     # Allow back tracking that helps agents are not discouraged too heavily
     # from exploring backwards if there is no way to advance
@@ -305,6 +311,8 @@ import time
 #    new_env.render()
 #
 #    time.sleep(0.05)
+
+
 
 
 
