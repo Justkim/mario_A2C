@@ -159,8 +159,8 @@ class Model(object):
             pi1,policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,pg_loss,neglogpac,vf_loss, entropy, _train], td_map)
             if flag.DEBUG:
                 print("pd",pi1)
-            logger.record_tabular("neglog", neglogpac1)
-            logger.record_tabular("adv", advantages)
+            #logger.record_tabular("neglog", neglogpac1)
+            #logger.record_tabular("adv", advantages)
 
             return policy_loss, value_loss, policy_entropy
 
