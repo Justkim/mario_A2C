@@ -29,7 +29,7 @@ def main():
     with tf.Session(config=config):
         model.learn(policy=policies.A2CPolicy,
                             env=SubprocVecEnv([env.make_train_0]),
-                            nsteps=256,
+                            nsteps=2048,
                             total_timesteps=1000000000,
                             gamma=0.99,
                             lam = 0.95,

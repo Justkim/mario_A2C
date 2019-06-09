@@ -4,6 +4,7 @@ import numpy as np
 import os.path as osp
 import tensorflow as tf
 from baselines import logger
+import flag
 
 
 import cv2
@@ -156,7 +157,8 @@ class Model(object):
                       lr_: lr}
 
             pi1,policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,pg_loss,neglogpac,vf_loss, entropy, _train], td_map)
-            print("pd",pi1)
+            if flag.DEBUG:
+                print("pd",pi1)
             logger.record_tabular("neglog", neglogpac1)
             logger.record_tabular("adv", advantages)
 
@@ -221,7 +223,8 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values = self.model.step(self.obs, self.dones)
-            step_num_to_name(actions)
+            if flag.DEBUG:
+                step_num_to_name(actions)
             # print(tf.is_numeric_tensor(actions))
             # print(tf.is_numeric_tensor(values))
             # Append the observations into the mb
@@ -287,8 +290,9 @@ class Runner(AbstractEnvRunner):
             # print("nextnonterminal",nextnonterminal)
             # print("reward",mb_rewards[t])
             # print("mb_value",mb_values)
-            print("REWARD", mb_rewards[t])
-            print("VALUE",mb_values[t])
+            if flag.DEBUG:
+                print("REWARD", mb_rewards[t])
+                print("VALUE",mb_values[t])
 
 
             delta = mb_rewards[t] + self.gamma * nextvalues * nextnonterminal - mb_values[t]
@@ -322,7 +326,7 @@ def learn(policy,
           lr,
           max_grad_norm,
           log_interval,save_interval):
-    noptepochs = 10
+    noptepochs = 4
     nminibatches = 8 #8
 
     # noptepochs = 1
@@ -335,11 +339,13 @@ def learn(policy,
 
     # Get state_space and action_space
     ob_space = env.observation_space
-    print("observation state is ",ob_space) #observation state is  Box(96, 96, 4)
+    if flag.DEBUG:
+        print("observation state is ",ob_space) #observation state is  Box(96, 96, 4)
 
 
     ac_space = env.action_space
-    print("action state is ", ac_space) #action state is  Discrete(7)
+    if flag.DEBUG:
+        print("action state is ", ac_space) #action state is  Discrete(7)
 
 
 
@@ -388,7 +394,6 @@ def learn(policy,
         # Index of each element of batch_size
         # Create the indices array
         indices = np.arange(batch_size)
-
         for _ in range(noptepochs):
             # Randomize the indexes
             np.random.shuffle(indices)
@@ -420,9 +425,6 @@ def learn(policy,
             ev<0  =>  worse than just predicting zero
             """
             ev = explained_variance(values, returns)
-
-
-
             logger.record_tabular("nupdates", update)
             logger.record_tabular("total_timesteps", update * batch_size)
             logger.record_tabular("fps", fps)
@@ -433,13 +435,11 @@ def learn(policy,
             logger.record_tabular("time elapsed", float(tnow - tfirststart))
             logger.record_tabular("total_loss",float(float(lossvalues[0]) - float(lossvalues[2]) * ent_coef + float(lossvalues[1]) * vf_coef))
             logger.dump_tabular()
-
         if update % save_interval == 0 or update==1:
             savepath = "./models/" + str(update) + "/model.ckpt"
-
             model.save(savepath)
-            print('Saving to', savepath)
-
+            if flag.DEBUG:
+                print('Saving to', savepath)
 
     env.close()
 
@@ -473,24 +473,17 @@ def play(policy, env):
         # Get the action
         actions, values = model.step(obs)
         print("actions is",actions)
-
         # Take actions in env and look the results
         obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
-
-
-
-
         # obs, rewards, done, _ = env.step(actions)
         # print(obs[0].shape)
         # cv2.imshow("frame0",obs[0])
         print("reward",rewards)
         # print("steps", boom)
 
-
         score += rewards
-
         env.render()
         time.sleep(0.03)
         # cv2.waitKey(0)

@@ -7,6 +7,7 @@ import gym_super_mario_bros
 from gym_super_mario_bros.actions import RIGHT_ONLY
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from baselines.common.atari_wrappers import FrameStack
+import flag
 
 from baselines.common.distributions import make_pdtype
 
@@ -47,8 +48,9 @@ class PreprocessFrame(gym.ObservationWrapper):
 
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
         frame = frame[:, :, None]
-        cv2.imshow("frame",frame)
-        cv2.waitKey(0)
+        # if flag.DEBUG:
+        #     cv2.imshow("frame",frame)
+        #     cv2.waitKey(0)
         return frame
 
 class ActionsDiscretizer(gym.ActionWrapper):
