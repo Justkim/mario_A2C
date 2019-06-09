@@ -71,7 +71,7 @@ class A2CPolicy(object):
             self.p_layer=tf.layers.dense(inputs=self.fc_common,
                            units=8,
                            activation=tf.nn.elu,
-                           kernel_initializer=tf.contrib.layers.xavier_initializer(),name="p_layer"
+                           kernel_initializer=tf.orthogonal_initializer(gain=0.01),name="p_layer"
                            )
             #
             # self.p_layer = tf.layers.dense(inputs=self.fc_common,
@@ -113,7 +113,6 @@ class A2CPolicy(object):
             action, value = sess.run([a0, vf], {inputs_: state_in})
             #print(sl)
 
-
             # max=-1
             # maxa=0
             # for i in range(0,7):
@@ -141,7 +140,6 @@ class A2CPolicy(object):
 
         # Function that output only the action to take
         def select_action(state_in, *_args, **_kwargs):
-
             return sess.run(a0, {inputs_: state_in})
 
         self.inputs_ = inputs_
