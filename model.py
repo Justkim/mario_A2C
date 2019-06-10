@@ -95,9 +95,10 @@ class Model(object):
 
         # neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
-
-        neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
-        # neglogpac=train_model.pd.neglogp(actions_)
+        if flag.LAST_LAYER_IMPL:
+            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
+        else:
+            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
 
         #neglogpac=train_model.pd.neglogp(actions_)
@@ -114,7 +115,10 @@ class Model(object):
 
         # Entropy is used to improve exploration by limiting the premature convergence to suboptimal policy.
         # entropy = tf.reduce_mean(train_model.pd.entropy())
-        entropy=tf.reduce_mean(train_model.dist.entropy(name="ent"))
+        if flag.LAST_LAYER_IMPL:
+            entropy=tf.reduce_mean(train_model.dist.entropy(name="ent"))
+        else:
+            entropy = tf.reduce_mean(train_model.pd.entropy())
         # vf_loss=tf.zeros(vf_loss.shape,dtype=tf.float32)
 
         loss = pg_loss - (entropy * ent_coef) + (vf_loss * vf_coef)
@@ -155,8 +159,11 @@ class Model(object):
                       advantages_: advantages,  # Use to calculate our policy loss
                       rewards_: returns,  # Use as a bootstrap for real value
                       lr_: lr}
-
-            pi1,policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,pg_loss,neglogpac,vf_loss, entropy, _train], td_map)
+            if flag.LAST_LAYER_IMPL:
+                pi1,policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,pg_loss,neglogpac,vf_loss, entropy, _train], td_map)
+            else:
+                pi1, policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run(
+                    [train_model.pi, pg_loss, neglogpac, vf_loss, entropy, _train], td_map)
             if flag.DEBUG:
                 print("pd",pi1)
             #logger.record_tabular("neglog", neglogpac1)
@@ -326,8 +333,17 @@ def learn(policy,
           lr,
           max_grad_norm,
           log_interval,save_interval):
+
     noptepochs = 4
-    nminibatches = 8 #8
+    if flag.ON_DESKTOP:
+        nminibatches = 1 #8
+    else:
+        nminibatches = 8
+
+    if flag.ON_DESKTOP:
+        noptepochs = 1  # 8
+    else:
+        noptepochs = 4
 
     # noptepochs = 1
     # nminibatches = 1
@@ -460,7 +476,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/1500/model.ckpt"
+    load_path = "./models/200/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -473,8 +489,13 @@ def play(policy, env):
         # Get the action
         actions, values = model.step(obs)
         print("actions is",actions)
+        if(actions==7):
+            obs, rewards, done, _ = env.step(5)
+            obs, rewards, done, _ = env.step(5)
+        else:
+
         # Take actions in env and look the results
-        obs, rewards, done, _ = env.step(actions)
+             obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)

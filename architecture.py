@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import baselines.common.distributions as dp
+import flag
 
 import baselines.common.distributions
 from baselines.common.distributions import make_pdtype
@@ -42,7 +43,9 @@ class A2CPolicy(object):
         # Based on the action space, will select what probability distribution type
         # we will use to distribute action in our stochastic policy (in our case DiagGaussianPdType
         # aka Diagonal Gaussian, 3D normal distribution
+
         self.pdtype = dp.CategoricalPdType(7)
+
 
         height, weight, channel = ob_space.shape
         ob_shape = (height, weight, channel)
@@ -68,11 +71,7 @@ class A2CPolicy(object):
             conv3 = conv_layer(conv2, 64, 3, 1, gain)# 8 64 8 8
             flatten1 = tf.layers.flatten(conv3,"FLAT") # 8 4096
             self.fc_common = fc_layer(flatten1, 512,gain=gain,name1="FC512") # 8 512
-            self.p_layer=tf.layers.dense(inputs=self.fc_common,
-                           units=8,
-                           activation=tf.nn.elu,
-                           kernel_initializer=tf.orthogonal_initializer(gain=0.01),name="p_layer"
-                           )
+
             #
             # self.p_layer = tf.layers.dense(inputs=self.fc_common,
             #                                units=7,
@@ -82,10 +81,21 @@ class A2CPolicy(object):
             # This build a fc connected layer that returns a probability distribution
             # over actions (self.pd) and our pi logits (self.pi).
             # self.pd, self.pi = self.pdtype.pdfromlatent(fc_common, init_scale=0.01)
-            self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
-            self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
+            if flag.LAST_LAYER_IMPL:
+                self.p_layer = tf.layers.dense(inputs=self.fc_common,
+                                               units=8,
+                                               activation=tf.nn.elu,
+                                               kernel_initializer=tf.orthogonal_initializer(gain=0.01), name="p_layer"
+                                               )
+                self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
+                self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
             #
-            a0=self.dist.sample()
+                a0=self.dist.sample()
+            else:
+                self.pdtype = make_pdtype(action_space)
+                self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
+                a0 = self.pd.sample()
+
             # entropy=self.dist.entropy("entropy")
 
 

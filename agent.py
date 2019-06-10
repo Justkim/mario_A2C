@@ -3,7 +3,7 @@ import numpy as np
 import gym
 import math
 import os
-
+import flag
 import model
 import architecture as policies
 import mario_env as env
@@ -26,10 +26,17 @@ def main():
     # config.gpu_options.allow_growth = True
     #[env.make_train_0,env.make_train_1,env.make_train_2,env.make_train_3,env.make_train_4,env.make_train_5,env.make_train_6,env.make_train_7]
     #env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0
+    flag.on_desktop=True
+
+    if flag.ON_DESKTOP:
+        nsteps=1
+    else:
+        nsteps=2048
+
     with tf.Session(config=config):
         model.learn(policy=policies.A2CPolicy,
                             env=SubprocVecEnv([env.make_train_0]),
-                            nsteps=2048,
+                            nsteps=nsteps,
                             total_timesteps=1000000000,
                             gamma=0.99,
                             lam = 0.95,
