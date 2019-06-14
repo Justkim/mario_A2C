@@ -96,7 +96,7 @@ class Model(object):
         # neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
         if flag.LAST_LAYER_IMPL:
-            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
+            neglogpac = (-1)*tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
         else:
             neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
@@ -108,6 +108,7 @@ class Model(object):
 
 
         # 1/n * sum A(si,ai) * -logpi(ai|si)
+        # pg_loss = tf.reduce_mean(advantages_ * neglogpac)
         pg_loss = tf.reduce_mean(advantages_ * neglogpac)
 
         # Value loss 1/2 SUM [R - V(s)]^2
@@ -166,8 +167,8 @@ class Model(object):
                     [train_model.pi, pg_loss, neglogpac, vf_loss, entropy, _train], td_map)
             if flag.DEBUG:
                 print("pd",pi1)
-            #logger.record_tabular("neglog", neglogpac1)
-            #logger.record_tabular("adv", advantages)
+            logger.record_tabular("neglog", neglogpac1)
+            logger.record_tabular("adv", advantages)
 
             return policy_loss, value_loss, policy_entropy
 
@@ -246,7 +247,8 @@ class Runner(AbstractEnvRunner):
 
             if actions[0]==7:
                 self.obs[:], rewards1, self.dones,_=self.env.step([5])
-                actions=[5]
+                self.obs[:], rewards1, self.dones,_=self.env.step([5])
+                actions=[2]
                 if not self.dones[0]:
             # Take actions in env and look the results
                     self.obs[:], rewards, self.dones, _ = self.env.step(actions)
@@ -464,6 +466,14 @@ def play(policy, env):
     # Get state_space and action_space
     ob_space = env.observation_space
     ac_space = env.action_space
+    if flag.DEBUG:
+        print("observation state is ",ob_space) #observation state is  Box(96, 96, 4)
+
+
+  
+    if flag.DEBUG:
+        print("action state is ", ac_space) #action state is  Discrete(7)
+    
 
     # Instantiate the model object (that creates step_model and train_model)
     model = Model(policy=policy,
@@ -476,7 +486,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/200/model.ckpt"
+    load_path = "./models/2000/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -492,6 +502,7 @@ def play(policy, env):
         if(actions==7):
             obs, rewards, done, _ = env.step(5)
             obs, rewards, done, _ = env.step(5)
+            obs, rewards, done, _ = env.step(2)
         else:
 
         # Take actions in env and look the results
