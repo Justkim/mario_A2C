@@ -187,6 +187,7 @@ class Model(object):
             print('Loading ' + load_path)
             saver.restore(sess, load_path)
 
+
         self.train = train
         self.train_model = train_model
         # self.step_model = step_model
@@ -486,7 +487,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/2000/model.ckpt"
+    load_path = "./models/500/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -497,8 +498,10 @@ def play(policy, env):
         boom += 1
 
         # Get the action
-        actions, values = model.step(obs)
-        print("actions is",actions)
+        actions, values,pi = model.step(obs)
+
+        print("action is",actions)
+        print("pi is", pi)
         if(actions==7):
             obs, rewards, done, _ = env.step(5)
             obs, rewards, done, _ = env.step(5)
