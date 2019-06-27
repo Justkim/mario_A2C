@@ -183,10 +183,10 @@ class Model(object):
             """
             Load the model
             """
+
             saver = tf.train.Saver()
             print('Loading ' + load_path)
             saver.restore(sess, load_path)
-
 
         self.train = train
         self.train_model = train_model
@@ -245,11 +245,11 @@ class Runner(AbstractEnvRunner):
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
 
-
             if actions[0]==7:
                 self.obs[:], rewards1, self.dones,_=self.env.step([5])
                 self.obs[:], rewards1, self.dones,_=self.env.step([5])
-                actions=[2]
+                self.obs[:], rewards1, self.dones, _ = self.env.step([2])
+                actions=[0]
                 if not self.dones[0]:
             # Take actions in env and look the results
                     self.obs[:], rewards, self.dones, _ = self.env.step(actions)
@@ -350,8 +350,6 @@ def learn(policy,
 
     # noptepochs = 1
     # nminibatches = 1
-
-
 
     # Get the nb of env
     nenvs = env.num_envs
@@ -487,7 +485,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/500/model.ckpt"
+    load_path = "./models/350/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -496,16 +494,15 @@ def play(policy, env):
     done = False
     while done == False:
         boom += 1
-
         # Get the action
-        actions, values,pi = model.step(obs)
-
+        actions, values = model.step(obs)
         print("action is",actions)
-        print("pi is", pi)
+        #print("pi is", pi)
         if(actions==7):
             obs, rewards, done, _ = env.step(5)
             obs, rewards, done, _ = env.step(5)
             obs, rewards, done, _ = env.step(2)
+            obs, rewards, done, _ = env.step(0)
         else:
 
         # Take actions in env and look the results
