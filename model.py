@@ -249,11 +249,8 @@ class Runner(AbstractEnvRunner):
                 self.obs[:], rewards1, self.dones,_=self.env.step([5])
                 self.obs[:], rewards1, self.dones,_=self.env.step([5])
                 self.obs[:], rewards1, self.dones, _ = self.env.step([2])
-                actions=[0]
-                if not self.dones[0]:
-            # Take actions in env and look the results
-                    self.obs[:], rewards, self.dones, _ = self.env.step(actions)
-                    rewards=rewards+rewards1
+                self.obs[:], rewards, self.dones, _ = self.env.step([0])
+                rewards=rewards+rewards1
             else:
                 self.obs[:], rewards, self.dones, _ = self.env.step(actions)
 
