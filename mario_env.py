@@ -126,7 +126,7 @@ class AllowBacktracking(gym.Wrapper):
         # self._max_x = max(self._max_x, self._cur_x)
         # # print("real reward",rew)
         #rew=(rew) * 0.01 - 0.02
-	rew=(rew) * 0.01 
+        rew =(rew) * 0.01
         # rew=rew - 1
         return obs,rew, done, info
 
