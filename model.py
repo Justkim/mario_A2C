@@ -487,7 +487,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/500/model.ckpt"
+    load_path = "./models/6f83610858933e1159e9ba989200eb924d0b1f0f/350/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -498,10 +498,9 @@ def play(policy, env):
         boom += 1
 
         # Get the action
-        actions, values,pi = model.step(obs)
+        actions, values = model.step(obs)
 
         print("action is",actions)
-        print("pi is", pi)
         if(actions==7):
             obs, rewards, done, _ = env.step(5)
             obs, rewards, done, _ = env.step(5)
