@@ -41,7 +41,7 @@ def main():
                             gamma=0.99,
                             lam = 0.95,
                             vf_coef=0.5,
-                            ent_coef=0.001,
+                            ent_coef=0.1,
                             lr = 2e-4,
                             max_grad_norm = 0.5,
                             log_interval = 10,
