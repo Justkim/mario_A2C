@@ -245,14 +245,7 @@ class Runner(AbstractEnvRunner):
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
 
-            if actions[0]==7:
-                self.obs[:], rewards1, self.dones,_=self.env.step([5])
-                self.obs[:], rewards1, self.dones,_=self.env.step([5])
-                self.obs[:], rewards1, self.dones, _ = self.env.step([2])
-                self.obs[:], rewards, self.dones, _ = self.env.step([0])
-                rewards=rewards+rewards1
-            else:
-                self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+            self.obs[:], rewards, self.dones, _ = self.env.step(actions)
 
             mb_rewards.append(rewards)
         # batch of steps to batch of rollouts
@@ -495,15 +488,9 @@ def play(policy, env):
         actions, values = model.step(obs)
         print("action is",actions)
         #print("pi is", pi)
-        if(actions==7):
-            obs, rewards, done, _ = env.step(5)
-            obs, rewards, done, _ = env.step(5)
-            obs, rewards, done, _ = env.step(2)
-            obs, rewards, done, _ = env.step(0)
-        else:
 
         # Take actions in env and look the results
-             obs, rewards, done, _ = env.step(actions)
+        obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
         # obs, rewards, done, _ = env.step(actions)
