@@ -31,21 +31,21 @@ def main():
     if flag.ON_DESKTOP:
         nsteps=1
     else:
-        nsteps=2048
+        nsteps=128
 
     with tf.Session(config=config):
         model.learn(policy=policies.A2CPolicy,
-                            env=SubprocVecEnv([env.make_train_0]),
+                            env=SubprocVecEnv([env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0]),
                             nsteps=nsteps,
                             total_timesteps=1000000000,
                             gamma=0.99,
                             lam = 0.95,
                             vf_coef=0.5,
-                            ent_coef=0.1,
+                            ent_coef=0.01,
                             lr = 2e-4,
                             max_grad_norm = 0.5,
                             log_interval = 10,
-                            save_interval=50
+                            save_interval=100
                             )
 
 if __name__ == '__main__': #this is important.why?
