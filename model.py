@@ -142,7 +142,7 @@ class Model(object):
         trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
 
         # 4. Backpropagation
-
+f
         _train = trainer.apply_gradients(grads)
         def train(states_in, actions, returns, values, lr):
             # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
@@ -376,8 +376,8 @@ def learn(policy,
 
     # Load the model
     # If you want to continue training
-    # load_path = "./models/90/model.ckpt"
-    # model.load(load_path)
+    load_path = "./models/300/model.ckpt"
+    model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
     # Start total timer
@@ -475,7 +475,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/350/model.ckpt"
+    load_path = "./models/NoAdditionalActions_8fbebc4cd4a0c332259a8ffde438aa429cbbeb6e/300/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
