@@ -142,7 +142,7 @@ class Model(object):
         trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
 
         # 4. Backpropagation
-f
+
         _train = trainer.apply_gradients(grads)
         def train(states_in, actions, returns, values, lr):
             # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
