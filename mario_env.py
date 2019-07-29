@@ -128,7 +128,6 @@ class AllowBacktracking(gym.Wrapper):
 
         rew=(rew) /15  - 0.01
        # rew=(rew) /15 -1
-
         # rew=rew - 1
         return obs,rew, done, info
 
