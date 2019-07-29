@@ -5,6 +5,7 @@ import os.path as osp
 import tensorflow as tf
 from baselines import logger
 import flag
+import scipy
 
 
 import cv2
@@ -96,7 +97,7 @@ class Model(object):
         # neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
         if flag.LAST_LAYER_IMPL:
-            neglogpac = (-1)*tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
+            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
         else:
             neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
@@ -224,14 +225,14 @@ class Runner(AbstractEnvRunner):
         # Total timesteps taken
         self.total_timesteps = total_timesteps
 
-    def run(self):
+    def run(self,epsilon):
         # Here, we init the lists that will contain the mb of experiences
         mb_obs, mb_actions, mb_rewards, mb_values, mb_dones = [], [], [], [], []
         # For n in range number of steps
         for n in range(self.nsteps):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
-            actions, values = self.model.step(self.obs, self.dones)
+            actions, values = self.model.step(self.obs, epsilon)
             if flag.DEBUG:
                 step_num_to_name(actions)
             # print(tf.is_numeric_tensor(actions))
@@ -242,6 +243,7 @@ class Runner(AbstractEnvRunner):
             mb_actions.append(actions)
             # Append the values calculated into the mb
             mb_values.append(values)
+            # Append the dones situations into the mb
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
 
@@ -325,7 +327,7 @@ def learn(policy,
           ent_coef,
           lr,
           max_grad_norm,
-          log_interval,save_interval):
+          log_interval,save_interval,decay_rate):
 
     noptepochs = 4
     if flag.ON_DESKTOP:
@@ -376,17 +378,19 @@ def learn(policy,
 
     # Load the model
     # If you want to continue training
-    load_path = "./models/300/model.ckpt"
-    model.load(load_path)
+    #load_path = "./models/300/model.ckpt"
+    #model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
     # Start total timer
     tfirststart = time.time()
+    epsilon=1
     for update in range(1, total_timesteps // batch_size + 1):
         # Start timer
         tstart = time.time()
         # Get minibatch
-        obs, actions, returns, values = runner.run()
+        obs, actions, returns, values = runner.run(epsilon)
+        epsilon=epsilon-decay_rate
         # print("RUNNER")
         # print("action",actions)
         # print("action", actions)
@@ -475,7 +479,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "./models/NoAdditionalActions_8fbebc4cd4a0c332259a8ffde438aa429cbbeb6e/300/model.ckpt"
+    load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_577dc984a4e8798e6a1c4ed0c5d07a76d1f4245/300+4900+2000/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -485,9 +489,9 @@ def play(policy, env):
     while done == False:
         boom += 1
         # Get the action
-        actions, values = model.step(obs)
+        actions, values, = model.step(obs,0)
         print("action is",actions)
-        #print("pi is", pi)
+
 
         # Take actions in env and look the results
         obs, rewards, done, _ = env.step(actions)

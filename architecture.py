@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import baselines.common.distributions as dp
 import flag
+import secrets
 
 import baselines.common.distributions
 from baselines.common.distributions import make_pdtype
@@ -54,7 +55,7 @@ class A2CPolicy(object):
         inputs_ = tf.placeholder(tf.float32, [None, *ob_shape], name="input")
 
         # Normalize the images
-        scaled_images = tf.cast(inputs_, tf.float32) / 255.
+        scaled_images = tf.cast(inputs_, tf.float32) / 255.0
 
         """
         Build the model
@@ -83,7 +84,7 @@ class A2CPolicy(object):
             # self.pd, self.pi = self.pdtype.pdfromlatent(fc_common, init_scale=0.01)
             if flag.LAST_LAYER_IMPL:
                 self.p_layer = tf.layers.dense(inputs=self.fc_common,
-                                               units=8,
+                                               units=7,
                                                activation=tf.nn.elu,
                                                kernel_initializer=tf.orthogonal_initializer(gain=0.01), name="p_layer"
                                                )
@@ -114,13 +115,23 @@ class A2CPolicy(object):
         # Take an action in the action distribution (remember we are in a situation
         # of stochastic policy so we don't always take the action with the highest probability
         # for instance if we have 2 actions 0.7 and 0.3 we have 30% chance to take the second)
+        #stupied idea:))
+
+
 
 
 
         # Function use to take a step returns action to take and V(s)
-        def step(state_in, *_args, **_kwargs):
+        def step(state_in,epsilon, *_args, **_kwargs):
+
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
             action, value = sess.run([a0, vf], {inputs_: state_in})
+            if (np.random.random_sample() < epsilon):
+                a=[0,1,2,3,4,5,6]
+                secrets.choice(a)
+                action=a
+
+
             #print(sl)
 
             # max=-1
@@ -136,9 +147,6 @@ class A2CPolicy(object):
             # print("RIGHTJUMPFAST: ",pi[0][4])
             # print("JUMP:",pi[0][5])
             # print("LEFT: ",pi[0][6])
-
-
-
 
 
 
