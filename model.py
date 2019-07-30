@@ -131,9 +131,9 @@ class Model(object):
 
         # 2. Calculate the gradients
         grads = tf.gradients(loss, params)
-        if max_grad_norm is not None:
+        #if max_grad_norm is not None:
             # Clip the gradients (normalize)
-            grads, grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
+            #grads, grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
         grads = list(zip(grads, params))
 
         # zip aggregate each gradient with parameters associated
