@@ -54,7 +54,7 @@ class Model(object):
                  vf_coef,
                  max_grad_norm):
         sess = tf.get_default_session()
-        # sess = tf_debug.LocalCLIDebugWrapperSessionp.array([[1, 1], [2, 2], [3, 3]], dtype=np.float32)n(sess)
+        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
         # Here we create the placeholders
 
         timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -482,7 +482,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_577dc984a4e8798e6a1c4ed0c5d07a76d1f4245/300+4900+2000/model.ckpt"
+    load_path = "/home/kim/mario_A2C/models/NoA/100/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
