@@ -386,10 +386,12 @@ def learn(policy,
     tfirststart = time.time()
     epsilon=1
     for update in range(1, total_timesteps // batch_size + 1):
+        print("1")
         # Start timer
         tstart = time.time()
         # Get minibatch
         obs, actions, returns, values = runner.run(epsilon)
+        print("2")
         epsilon=epsilon-decay_rate
         # print("RUNNER")
         # print("action",actions)
@@ -414,6 +416,7 @@ def learn(policy,
                 mbinds = indices[start:end]
                 slices = (arr[mbinds] for arr in (obs, actions, returns, values))
                 mb_losses.append(model.train(*slices, lr))
+                print("done")
         print("--------------------------------------")
         # for i in mb_losses:
         #     print("mb_loss",i)

@@ -50,6 +50,7 @@ class A2CPolicy(object):
 
         height, weight, channel = ob_space.shape
         ob_shape = (height, weight, channel)
+        epsilon_=tf.placeholder(tf.float32)
 
         # Create the input placeholder
         inputs_ = tf.placeholder(tf.float32, [None, *ob_shape], name="input")
@@ -91,11 +92,21 @@ class A2CPolicy(object):
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
                 self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
             #
-                a0=self.dist.sample()
+               # a0=self.dist.sample()
             else:
                 self.pdtype = make_pdtype(action_space)
                 self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
                 a0 = self.pd.sample()
+
+
+            random = tf.random_uniform(shape=(),dtype=tf.float32)
+            random_uniform=tf.random_uniform(shape=([12]), minval=0, maxval=6, dtype=tf.int32)
+            sample_action=self.dist.sample()
+
+
+
+            a0=tf.cond(random<epsilon_,lambda :random_uniform,lambda:sample_action)
+
 
             # entropy=self.dist.entropy("entropy")
 
@@ -125,11 +136,10 @@ class A2CPolicy(object):
         def step(state_in,epsilon, *_args, **_kwargs):
 
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
-            action, value = sess.run([a0, vf], {inputs_: state_in})
-            if (np.random.random_sample() < epsilon):
-                a=[0,1,2,3,4,5,6]
-                secrets.choice(a)
-                action=a
+            action, value = sess.run([a0, vf], {inputs_: state_in,epsilon_:epsilon})
+
+
+
 
 
             #print(sl)
