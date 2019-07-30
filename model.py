@@ -386,12 +386,12 @@ def learn(policy,
     tfirststart = time.time()
     epsilon=1
     for update in range(1, total_timesteps // batch_size + 1):
-        print("1")
+        #print("1")
         # Start timer
         tstart = time.time()
         # Get minibatch
         obs, actions, returns, values = runner.run(epsilon)
-        print("2")
+        #print("2")
         epsilon=epsilon-decay_rate
         # print("RUNNER")
         # print("action",actions)
