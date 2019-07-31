@@ -91,21 +91,21 @@ class A2CPolicy(object):
                                                )
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
                 self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
+
             #
-               # a0=self.dist.sample()
+                a0=self.dist.sample()
             else:
                 self.pdtype = make_pdtype(action_space)
                 self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
                 a0 = self.pd.sample()
 
 
-            random = tf.random_uniform(shape=(),dtype=tf.float32)
-            random_uniform=tf.random_uniform(shape=([12]), minval=0, maxval=6, dtype=tf.int32)
-            sample_action=self.dist.sample()
+            #random = tf.random_uniform(shape=(),dtype=tf.float32)
+            #random_uniform=tf.random_uniform(shape=([1]), minval=0, maxval=6, dtype=tf.int32)
 
 
 
-            a0=tf.cond(random<epsilon_,lambda :random_uniform,lambda:sample_action)
+            #a0=tf.cond(random<epsilon_,lambda :random_uniform,lambda:sample_action)
 
 
             # entropy=self.dist.entropy("entropy")
@@ -116,7 +116,6 @@ class A2CPolicy(object):
 
             #self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
             # Calculate the v(s)
-
 
             vf = fc_layer(self.fc_common, 1, activation_fn=None,name1="LASTFC")[:,0] #8 1
 
@@ -136,7 +135,7 @@ class A2CPolicy(object):
         def step(state_in,epsilon, *_args, **_kwargs):
 
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
-            action, value = sess.run([a0, vf], {inputs_: state_in,epsilon_:epsilon})
+            actions,value = sess.run([a0,vf], {inputs_: state_in,epsilon_:epsilon})
 
 
 
@@ -160,7 +159,9 @@ class A2CPolicy(object):
 
 
 
-            return action, value
+
+
+            return actions, value
 
         # Function that calculates only the V(s)
         def value(state_in, *_args, **_kwargs):

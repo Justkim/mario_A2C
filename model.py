@@ -233,6 +233,12 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values = self.model.step(self.obs, epsilon)
+            random=np.random.random_sample()
+
+            if(random<epsilon):
+
+                random_index=np.random.randint(7, size=12)
+                actions=random_index
             if flag.DEBUG:
                 step_num_to_name(actions)
             # print(tf.is_numeric_tensor(actions))
@@ -416,7 +422,7 @@ def learn(policy,
                 mbinds = indices[start:end]
                 slices = (arr[mbinds] for arr in (obs, actions, returns, values))
                 mb_losses.append(model.train(*slices, lr))
-                print("done")
+
         print("--------------------------------------")
         # for i in mb_losses:
         #     print("mb_loss",i)
