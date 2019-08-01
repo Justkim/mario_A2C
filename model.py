@@ -167,7 +167,7 @@ class Model(object):
                 pi1, policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run(
                     [train_model.pi, pg_loss, neglogpac, vf_loss, entropy, _train], td_map)
             if flag.DEBUG:
-                print("pd",pi1)
+                print("pd",scipy.special.softmax(pi1))
             #logger.record_tabular("neglog", neglogpac1)
             #logger.record_tabular("adv", advantages)
 
@@ -233,12 +233,14 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values = self.model.step(self.obs, epsilon)
+	    
             random=np.random.random_sample()
 
             if(random<epsilon):
 
-                random_index=np.random.randint(7, size=12)
+                random_index=np.random.randint(7, size=1)
                 actions=random_index
+                print("RANDOM ACTION")
             if flag.DEBUG:
                 step_num_to_name(actions)
             # print(tf.is_numeric_tensor(actions))
@@ -254,6 +256,7 @@ class Runner(AbstractEnvRunner):
             mb_dones.append(self.dones)
 
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+            self.env.render()
 
             mb_rewards.append(rewards)
         # batch of steps to batch of rollouts
@@ -488,7 +491,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "/home/kim/mario_A2C/models/NoA/100/model.ckpt"
+    load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -523,7 +526,7 @@ def play(policy, env):
 
 
 def step_num_to_name(step):
-    if step==0:
+    if step==[0]:
         print("NONE")
     elif step==1:
         print('right')
