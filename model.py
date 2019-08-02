@@ -167,7 +167,11 @@ class Model(object):
                 pi1, policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run(
                     [train_model.pi, pg_loss, neglogpac, vf_loss, entropy, _train], td_map)
             if flag.DEBUG:
-                print("pd",scipy.special.softmax(pi1))
+                if not flag.LAST_LAYER_IMPL:
+                    print("pd",scipy.special.softmax(pi1))
+                else:
+                    print("pd",pi1)
+
             #logger.record_tabular("neglog", neglogpac1)
             #logger.record_tabular("adv", advantages)
 
@@ -238,25 +242,30 @@ class Runner(AbstractEnvRunner):
 
             if(random<epsilon):
 
-                random_index=np.random.randint(7, size=1)
+                random_index=np.random.randint(7, size=12)
                 actions=random_index
-                print("RANDOM ACTION")
-            if flag.DEBUG:
-                step_num_to_name(actions)
+                #print("RANDOM ACTION")
+            #if flag.DEBUG:
+                #step_num_to_name(actions)
             # print(tf.is_numeric_tensor(actions))
             # print(tf.is_numeric_tensor(values))
             # Append the observations into the mb
             mb_obs.append(np.copy(self.obs))  # obs len nenvs (1 step per env)
+            #print("la")
             # Append the actions taken into the mb
             mb_actions.append(actions)
+            #print("lala")
             # Append the values calculated into the mb
             mb_values.append(values)
+            #print("lalala")
             # Append the dones situations into the mb
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
-
+            #print("lalalala")
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
-            self.env.render()
+            #print("too much la will kill you")
+            #self.env.render()
+
 
             mb_rewards.append(rewards)
         # batch of steps to batch of rollouts
@@ -393,7 +402,7 @@ def learn(policy,
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
     # Start total timer
     tfirststart = time.time()
-    epsilon=1
+    epsilon=0.05
     for update in range(1, total_timesteps // batch_size + 1):
         #print("1")
         # Start timer
@@ -401,7 +410,7 @@ def learn(policy,
         # Get minibatch
         obs, actions, returns, values = runner.run(epsilon)
         #print("2")
-        epsilon=epsilon-decay_rate
+        #epsilon=epsilon-decay_rate
         # print("RUNNER")
         # print("action",actions)
         # print("action", actions)
@@ -491,7 +500,8 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
+    #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
+    load_path = "./models/73000/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play

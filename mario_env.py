@@ -8,6 +8,7 @@ from gym_super_mario_bros.actions import RIGHT_ONLY
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from baselines.common.atari_wrappers import FrameStack
 import flag
+import collections
 
 from baselines.common.distributions import make_pdtype
 
@@ -65,6 +66,7 @@ class ActionsDiscretizer(gym.ActionWrapper):
         #right B=run faster
         #right A B=jump faster
         self.actions = []
+
         """
         What we do in this loop:
         For each action in actions
@@ -112,6 +114,8 @@ class AllowBacktracking(gym.Wrapper):
         super(AllowBacktracking, self).__init__(env)
         self._cur_x = 0
         self._max_x = 0
+        self.reward_q = collections.deque()
+
 
     def reset(self, **kwargs):  # pylint: disable=E0202
         self._cur_x = 0
@@ -125,10 +129,24 @@ class AllowBacktracking(gym.Wrapper):
         # rew = max(0, self._cur_x - self._max_x)
         # self._max_x = max(self._max_x, self._cur_x)
         # # print("real reward",rew)
+        stuck_flag =True
+
+
 
         rew=(rew) /15  - 0.01
        # rew=(rew) /15 -1
         # rew=rew - 1
+        if(len(self.reward_q)==10):
+            self.reward_q.popleft()
+        self.reward_q.append(rew)
+
+        for i in list(self.reward_q):
+
+            if i > -0.01:
+                stuck_flag = False
+        if stuck_flag:
+            rew=rew - 1.01
+
         return obs,rew, done, info
 
 

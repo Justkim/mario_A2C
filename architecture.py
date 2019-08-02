@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import baselines.common.distributions as dp
 import flag
-import secrets
+#import secrets
 
 import baselines.common.distributions
 from baselines.common.distributions import make_pdtype
@@ -87,10 +87,11 @@ class A2CPolicy(object):
                 self.p_layer = tf.layers.dense(inputs=self.fc_common,
                                                units=7,
                                                activation=tf.nn.elu,
-                                               kernel_initializer=tf.orthogonal_initializer(gain=0.01), name="p_layer"
+                                               kernel_initializer=tf.contrib.layers.variance_scaling_initializer(), name="p_layer"
                                                )
+                self.p_layer=(tf.maximum((self.p_layer), 1e-9))
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
-                self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
+                self.dist = tf.distributions.Categorical(logits=self.softmax_layer)
 
             #
                 a0=self.dist.sample()
