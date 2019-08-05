@@ -19,8 +19,6 @@ from utilities import make_path, find_trainable_variables, discount_with_dones
 from baselines.common import explained_variance
 from baselines.common.runners import AbstractEnvRunner
 from tensorflow.python import debug as tf_debug
-
-
 import time
 
 
@@ -54,7 +52,7 @@ class Model(object):
                  vf_coef,
                  max_grad_norm):
         sess = tf.get_default_session()
-        #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
         # Here we create the placeholders
 
         timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -140,7 +138,8 @@ class Model(object):
         # For instance zip(ABCD, xyza) => Ax, By, Cz, Da
 
         # 3. Build our trainer
-        trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
+        #trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
+        trainer=tf.train.AdamOptimizer(learning_rate=0.001,beta1=0.9,beta2=0.999,epsilon=1e-08,use_locking=False,name='Adam')
 
         # 4. Backpropagation
 
@@ -396,7 +395,7 @@ def learn(policy,
 
     # Load the model
     # If you want to continue training
-    #load_path = "./models/300/model.ckpt"
+    #load_path = "./models/580/model.ckpt"
     #model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
@@ -500,8 +499,8 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "./models/73000/model.ckpt"
+    load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
+    load_path = "./models/500/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
