@@ -395,8 +395,10 @@ def learn(policy,
 
     # Load the model
     # If you want to continue training
+
     #load_path = "./models/580/model.ckpt"
     #model.load(load_path)
+
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
     # Start total timer
