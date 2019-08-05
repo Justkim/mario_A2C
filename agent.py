@@ -44,7 +44,7 @@ def main():
                             ent_coef=0.001,
                             lr = 2e-4,
                             max_grad_norm = 0.5,
-                            log_interval = 10,
+                            log_interval = 5,
                             save_interval=5
                             )
 
