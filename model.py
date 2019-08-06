@@ -52,7 +52,7 @@ class Model(object):
                  vf_coef,
                  max_grad_norm):
         sess = tf.get_default_session()
-        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+        #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
         # Here we create the placeholders
 
         timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -139,7 +139,7 @@ class Model(object):
 
         # 3. Build our trainer
         #trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
-        trainer=tf.train.AdamOptimizer(learning_rate=0.001,beta1=0.9,beta2=0.999,epsilon=1e-08,use_locking=False,name='Adam')
+        trainer=tf.train.AdamOptimizer(learning_rate=lr_,beta1=0.9,beta2=0.999,epsilon=1e-08,use_locking=False,name='Adam')
 
         # 4. Backpropagation
 
@@ -501,8 +501,8 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "./models/500/model.ckpt"
+    #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
+    load_path = "./models/715/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
