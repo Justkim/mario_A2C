@@ -4,7 +4,7 @@ import numpy as np
 import os.path as osp
 import tensorflow as tf
 from baselines import logger
-import flaghttps://translate.google.com/
+import flag
 import scipy
 
 
