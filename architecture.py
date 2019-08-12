@@ -50,13 +50,13 @@ class A2CPolicy(object):
 
         height, weight, channel = ob_space.shape
         ob_shape = (height, weight, channel)
-        epsilon_=tf.placeholder(tf.float32)
+        epsilon_=tf.placeholder(tf.float64)
 
         # Create the input placeholder
-        inputs_ = tf.placeholder(tf.float32, [None, *ob_shape], name="input")
+        inputs_ = tf.placeholder(tf.float64, [None, *ob_shape], name="input")
 
         # Normalize the images
-        scaled_images = tf.cast(inputs_, tf.float32) / 255.0
+        scaled_images = tf.cast(inputs_, tf.float64) / 255.0
 
         """
         Build the model

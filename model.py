@@ -60,10 +60,10 @@ class Model(object):
         timestr = time.strftime("%Y%m%d-%H%M%S")
         dirname="./"+timestr+"log"
         logger.configure(dir=dirname)
-        actions_ = tf.placeholder(tf.int32, [None], name="actions_")
-        advantages_ = tf.placeholder(tf.float32, [None], name="advantages_")
-        rewards_ = tf.placeholder(tf.float32, [None], name="rewards_")
-        lr_ = tf.placeholder(tf.float32, name="learning_rate_")
+        actions_ = tf.placeholder(tf.int64, [None], name="actions_")
+        advantages_ = tf.placeholder(tf.float64, [None], name="advantages_")
+        rewards_ = tf.placeholder(tf.float64, [None], name="rewards_")
+        lr_ = tf.placeholder(tf.float64, name="learning_rate_")
 
 
         # Here we create our two models:
