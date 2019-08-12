@@ -236,7 +236,9 @@ class Runner(AbstractEnvRunner):
         for n in range(self.nsteps):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
-            actions, values = self.model.step(self.obs, epsilon)
+            actions, values,entropy = self.model.step(self.obs, epsilon)
+
+
             # print(tf.is_numeric_tensor(actions))
             # print(tf.is_numeric_tensor(values))
             # Append the observations into the mb
@@ -253,6 +255,7 @@ class Runner(AbstractEnvRunner):
             mb_dones.append(self.dones)
             #print("lalalala")
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+            rewards=rewards+ 0.01 *entropy
             #print("too much la will kill you")
             #self.env.render()
 

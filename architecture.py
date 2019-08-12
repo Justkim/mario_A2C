@@ -92,6 +92,7 @@ class A2CPolicy(object):
                 self.p_layer=(tf.maximum((self.p_layer), 1e-9))
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
                 self.dist = tf.distributions.Categorical(logits=self.p_layer)
+                self.entropy = tf.reduce_mean(self.dist.entropy(name="ent"))
 
 
             #
@@ -137,7 +138,7 @@ class A2CPolicy(object):
         def step(state_in,epsilon, *_args, **_kwargs):
 
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
-            actions,value = sess.run([a0,vf], {inputs_: state_in,epsilon_:epsilon})
+            actions,value,entropy = sess.run([a0,vf,self.entropy], {inputs_: state_in,epsilon_:epsilon})
 
 
 
@@ -163,7 +164,7 @@ class A2CPolicy(object):
 
 
 
-            return actions, value
+            return actions, value,entropy
 
         # Function that calculates only the V(s)
         def value(state_in, *_args, **_kwargs):
