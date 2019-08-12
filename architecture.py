@@ -91,7 +91,7 @@ class A2CPolicy(object):
                                                )
                 self.p_layer=(tf.maximum((self.p_layer), 1e-9))
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
-                self.dist = tf.distributions.Categorical(logits=self.softmax_layer)
+                self.dist = tf.distributions.Categorical(logits=self.p_layer)
 
             #
                 a0=self.dist.sample()
@@ -126,7 +126,7 @@ class A2CPolicy(object):
         # Take an action in the action distribution (remember we are in a situation
         # of stochastic policy so we don't always take the action with the highest probability
         # for instance if we have 2 actions 0.7 and 0.3 we have 30% chance to take the second)
-        #stupied idea:))
+        #stupied idepalayoaa:))
 
 
 

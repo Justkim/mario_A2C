@@ -40,8 +40,6 @@ class Model(object):
     - Save load the model
     """
 
-
-
     def __init__(self,
                  policy,
                  ob_space,
@@ -62,8 +60,6 @@ class Model(object):
         advantages_ = tf.placeholder(tf.float32, [None], name="advantages_")
         rewards_ = tf.placeholder(tf.float32, [None], name="rewards_")
         lr_ = tf.placeholder(tf.float32, name="learning_rate_")
-
-
         # Here we create our two models:
         # Step_model that is used for sampling
         step_model = policy(sess, ob_space, action_space, nenvs, 1, reuse=False) #reuse why?
@@ -88,9 +84,6 @@ class Model(object):
         #
         #
         #     result = recursive_map(actions_copy)
-
-
-
 
         # neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
@@ -236,13 +229,14 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values = self.model.step(self.obs, epsilon)
-	    
+
             random=np.random.random_sample()
 
             if(random<epsilon):
 
-                random_index=np.random.randint(7, size=12)
+                random_index=np.random.randint(7, size=3)
                 actions=random_index
+            print("ACTIONS ARE",actions)
                 #print("RANDOM ACTION")
             #if flag.DEBUG:
                 #step_num_to_name(actions)
@@ -263,7 +257,7 @@ class Runner(AbstractEnvRunner):
             #print("lalalala")
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
             #print("too much la will kill you")
-            #self.env.render()
+            self.env.render()
 
 
             mb_rewards.append(rewards)
