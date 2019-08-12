@@ -38,7 +38,7 @@ def main():
         made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0,
              env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0,
              env.make_train_0])
-        nsteps=1
+        nsteps=5
 
 
 
@@ -54,8 +54,8 @@ def main():
                             vf_coef=0.5,
                             ent_coef=0.5,
                             lr = 2e-4,
-                            max_grad_norm = 0.5,
-                            log_interval = 100,
+                            max_grad_norm = 0.05,
+                            log_interval = 10,
                             save_interval=200,decay_rate=0.001
                             )
 
