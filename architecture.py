@@ -90,7 +90,7 @@ class A2CPolicy(object):
                                                kernel_initializer=tf.orthogonal_initializer(gain=0.01), name="p_layer"
                                                )
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
-                self.dist = tf.distributions.Categorical(probs=self.softmax_layer)
+                self.dist = tf.distributions.Categorical(logits=self.p_layer)
 
             #
                 a0=self.dist.sample()
