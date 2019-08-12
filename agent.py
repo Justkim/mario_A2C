@@ -34,8 +34,12 @@ def main():
 
 
     else:
-        made_env=SubprocVecEnv([env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0])
-        nsteps=128
+
+        made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0,
+             env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0,
+             env.make_train_0])
+        nsteps=1
+
 
 
 
@@ -48,7 +52,7 @@ def main():
                             gamma=0.99,
                             lam = 0.95,
                             vf_coef=0.5,
-                            ent_coef=0.01,
+                            ent_coef=0.5,
                             lr = 2e-4,
                             max_grad_norm = 0.5,
                             log_interval = 100,
