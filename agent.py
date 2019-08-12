@@ -51,8 +51,8 @@ def main():
                             ent_coef=0.1,
                             lr = 2e-4,
                             max_grad_norm = 0.5,
-                            log_interval = 5,
-                            save_interval=5,decay_rate=0.001
+                            log_interval = 50,
+                            save_interval=200,decay_rate=0.001
                             )
 
 if __name__ == '__main__': #this is important.why?
