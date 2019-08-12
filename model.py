@@ -257,7 +257,7 @@ class Runner(AbstractEnvRunner):
             #print("lalalala")
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
             #print("too much la will kill you")
-            self.env.render()
+            #self.env.render()
 
 
             mb_rewards.append(rewards)
