@@ -234,7 +234,7 @@ class Runner(AbstractEnvRunner):
 
             if(random<epsilon):
 
-                random_index=np.random.randint(7, size=3)
+                random_index=np.random.randint(7, size=12)
                 actions=random_index
             print("ACTIONS ARE",actions)
                 #print("RANDOM ACTION")
