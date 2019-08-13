@@ -54,7 +54,7 @@ def main():
                             lr = 2e-4,
                             max_grad_norm = 0.05,
                             log_interval = 10,
-                            save_interval=200,decay_rate=0.001
+                            save_interval=1000,decay_rate=0.001
                             )
 
 if __name__ == '__main__': #this is important.why?
