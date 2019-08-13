@@ -60,10 +60,14 @@ class Model(object):
         timestr = time.strftime("%Y%m%d-%H%M%S")
         dirname="./"+timestr+"log"
         logger.configure(dir=dirname)
-        actions_ = tf.placeholder(tf.int64, [None], name="actions_")
-        advantages_ = tf.placeholder(tf.float64, [None], name="advantages_")
-        rewards_ = tf.placeholder(tf.float64, [None], name="rewards_")
-        lr_ = tf.placeholder(tf.float64, name="learning_rate_")
+        actions_ = tf.placeholder(tf.int32, [None], name="actions_")
+        advantages_ = tf.placeholder(tf.float32, [None], name="advantages_")
+        rewards_ = tf.placeholder(tf.float32, [None], name="rewards_")
+        lr_ = tf.placeholder(tf.float32, name="learning_rate_")
+        clip_range = tf.placeholder(tf.float32, [])
+        old_neglogpac= tf.placeholder(tf.float32, [None],name="oldneglog")
+        old_value=tf.placeholder(tf.float32,[None],name="oldvalue")
+
 
 
         # Here we create our two models:
@@ -103,17 +107,23 @@ class Model(object):
 
 
         #neglogpac=train_model.pd.neglogp(actions_)
-
+        ratio= tf.exp(old_neglogpac - neglogpac)
 
 
 
 
         # 1/n * sum A(si,ai) * -logpi(ai|si)
         # pg_loss = tf.reduce_mean(advantages_ * neglogpac)
-        pg_loss = tf.reduce_mean(advantages_ * neglogpac)
+        pg_loss = (-advantages_ * ratio)
+        clipped_pg_loss= -advantages_ * tf.clip_by_value(ratio, 1.0 - clip_range, 1.0 + clip_range)
+        selected_pg_loss=tf.reduce_mean(tf.maximum(pg_loss,clipped_pg_loss))
+
 
         # Value loss 1/2 SUM [R - V(s)]^2
-        vf_loss = tf.reduce_mean(mse(tf.squeeze(train_model.vf), rewards_))
+        clipped_vf= old_value + tf.clip_by_value(train_model.vf - old_value , -clip_range , clip_range)
+        vf_loss = mse(tf.squeeze(train_model.vf), rewards_)
+        clipped_vf_loss= mse(tf.squeeze(clipped_vf), rewards_)
+        selected_vf_loss= tf.reduce_mean(tf.maximum(vf_loss,clipped_vf_loss))
 
         # Entropy is used to improve exploration by limiting the premature convergence to suboptimal policy.
         # entropy = tf.reduce_mean(train_model.pd.entropy())
@@ -123,7 +133,7 @@ class Model(object):
             entropy = tf.reduce_mean(train_model.pd.entropy())
         # vf_loss=tf.zeros(vf_loss.shape,dtype=tf.float32)
 
-        loss = pg_loss - (entropy * ent_coef) + (vf_loss * vf_coef)
+        loss = selected_pg_loss - (entropy * ent_coef) + (selected_vf_loss * vf_coef)
 
         # Update parameters using loss
         # 1. Get the model parameters
@@ -145,7 +155,7 @@ class Model(object):
         # 4. Backpropagation
 
         _train = trainer.apply_gradients(grads)
-        def train(states_in, actions, returns, values, lr):
+        def train(states_in, actions, returns, values, neglogpac,lr):
             # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
             # Returns = R + yV(s')
 
@@ -160,12 +170,15 @@ class Model(object):
                       actions_: actions,
                       advantages_: advantages,  # Use to calculate our policy loss
                       rewards_: returns,  # Use as a bootstrap for real value
-                      lr_: lr}
+                      lr_: lr ,
+                      clip_range: 0.1,
+                      old_neglogpac: neglogpac ,
+                      old_value : values}
             if flag.LAST_LAYER_IMPL:
-                pi1,policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,pg_loss,neglogpac,vf_loss, entropy, _train], td_map)
+                pi1, policy_loss , value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,selected_pg_loss,selected_vf_loss, entropy, _train], td_map)
             else:
-                pi1, policy_loss, neglogpac1, value_loss, policy_entropy, _ = sess.run(
-                    [train_model.pi, pg_loss, neglogpac, vf_loss, entropy, _train], td_map)
+                pi1, policy_loss , value_loss, policy_entropy, _ = sess.run(
+                    [train_model.pi, selected_pg_loss ,selected_vf_loss, entropy, _train], td_map)
             if flag.DEBUG:
                 if not flag.LAST_LAYER_IMPL:
                     print("pd",scipy.special.softmax(pi1))
@@ -231,12 +244,12 @@ class Runner(AbstractEnvRunner):
 
     def run(self,epsilon):
         # Here, we init the lists that will contain the mb of experiences
-        mb_obs, mb_actions, mb_rewards, mb_values, mb_dones = [], [], [], [], []
+        mb_obs, mb_actions, mb_rewards, mb_values, mb_dones , mb_neglogpacs = [], [], [], [], [],[]
         # For n in range number of steps
         for n in range(self.nsteps):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
-            actions, values,entropy = self.model.step(self.obs, epsilon)
+            actions, values , neglogpacs = self.model.step(self.obs, epsilon)
             #random = np.random.random_sample()
 
             #if (random < epsilon):
@@ -254,6 +267,7 @@ class Runner(AbstractEnvRunner):
             #print("lala")
             # Append the values calculated into the mb
             mb_values.append(values)
+            mb_neglogpacs.append(neglogpacs)
             #print("lalala")
             # Append the dones situations into the mb
             # Append the dones situations into the mb
@@ -261,18 +275,19 @@ class Runner(AbstractEnvRunner):
             #print("lalalala")
 
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
-            rewards=rewards+ 0.1 *entropy
-            print("ATT",entropy)
-            self.env.render()
+
+            if flag.DEBUG:
+                self.env.render()
 
 
             mb_rewards.append(rewards)
         # batch of steps to batch of rollouts
         mb_obs = np.asarray(mb_obs, dtype=np.uint8)
-        mb_rewards = np.asarray(mb_rewards, dtype=np.float64)
-        mb_actions = np.asarray(mb_actions, dtype=np.int64)
-        mb_values = np.asarray(mb_values, dtype=np.float64)
+        mb_rewards = np.asarray(mb_rewards, dtype=np.float32)
+        mb_actions = np.asarray(mb_actions, dtype=np.int32)
+        mb_values = np.asarray(mb_values, dtype=np.float32)
         mb_dones = np.asarray(mb_dones, dtype=np.bool)
+        mb_neglogpacs=np.asanyarray(mb_neglogpacs,dtype=np.float32)
         last_values = self.model.value(self.obs)
 
         ### GENERALIZED ADVANTAGE ESTIMATION
@@ -322,7 +337,7 @@ class Runner(AbstractEnvRunner):
 
         # Returns
         mb_returns = mb_advantages + mb_values
-        x1=map(sf01, (mb_obs, mb_actions, mb_returns, mb_values))
+        x1=map(sf01, (mb_obs, mb_actions, mb_returns, mb_values,mb_neglogpacs))
         return x1
 
 
@@ -350,7 +365,7 @@ def learn(policy,
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 1
+        nminibatches = 8
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
@@ -407,7 +422,7 @@ def learn(policy,
         # Start timer
         tstart = time.time()
         # Get minibatch
-        obs, actions, returns, values = runner.run(epsilon)
+        obs, actions, returns, values , neglogpacs = runner.run(epsilon)
         #print("2")
         #epsilon=epsilon-decay_rate
         # print("RUNNER")
@@ -431,10 +446,10 @@ def learn(policy,
             for start in range(0, batch_size, batch_train_size):
                 end = start + batch_train_size
                 mbinds = indices[start:end]
-                slices = (arr[mbinds] for arr in (obs, actions, returns, values))
+                slices = (arr[mbinds] for arr in (obs, actions, returns, values, neglogpacs))
                 mb_losses.append(model.train(*slices, lr))
 
-        print("--------------------------------------")
+        #print("--------------------------------------")
         # for i in mb_losses:
         #     print("mb_loss",i)
         # Feedforward --> get losses --> update
