@@ -50,13 +50,13 @@ class A2CPolicy(object):
 
         height, weight, channel = ob_space.shape
         ob_shape = (height, weight, channel)
-        epsilon_=tf.placeholder(tf.float64)
+        epsilon_=tf.placeholder(tf.float32)
 
         # Create the input placeholder
-        inputs_ = tf.placeholder(tf.float64, [None, *ob_shape], name="input")
+        inputs_ = tf.placeholder(tf.float32, [None, *ob_shape], name="input")
 
         # Normalize the images
-        scaled_images = tf.cast(inputs_, tf.float64) / 255.0
+        scaled_images = tf.cast(inputs_, tf.float32) / 255.0
 
         """
         Build the model
@@ -92,11 +92,12 @@ class A2CPolicy(object):
                 self.p_layer=(tf.maximum((self.p_layer), 1e-9))
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
                 self.dist = tf.distributions.Categorical(logits=self.p_layer)
-                self.entropy = tf.reduce_mean(self.dist.entropy(name="ent"))
+
 
 
             #
                 a0=self.dist.sample()
+                self.neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.p_layer, labels=a0)
             else:
                 self.pdtype = make_pdtype(action_space)
                 self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
@@ -138,7 +139,7 @@ class A2CPolicy(object):
         def step(state_in,epsilon, *_args, **_kwargs):
 
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
-            actions,value,entropy = sess.run([a0,vf,self.entropy], {inputs_: state_in,epsilon_:epsilon})
+            actions,value,neglogpac = sess.run([a0,vf, self.neglogpac], {inputs_: state_in,epsilon_:epsilon})
 
 
 
@@ -164,7 +165,7 @@ class A2CPolicy(object):
 
 
 
-            return actions, value,entropy
+            return actions, value,neglogpac
 
         # Function that calculates only the V(s)
         def value(state_in, *_args, **_kwargs):
