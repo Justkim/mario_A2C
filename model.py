@@ -237,6 +237,11 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values,entropy = self.model.step(self.obs, epsilon)
+            #random = np.random.random_sample()
+
+            #if (random < epsilon):
+             #   random_index = np.random.randint(7, size=2)
+             #   actions = random_index
 
 
             # print(tf.is_numeric_tensor(actions))
@@ -254,10 +259,11 @@ class Runner(AbstractEnvRunner):
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
             #print("lalalala")
+
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
-            rewards=rewards+ 0.01 *entropy
-            #print("too much la will kill you")
-            #self.env.render()
+            rewards=rewards+ 0.1 *entropy
+            print("ATT",entropy)
+            self.env.render()
 
 
             mb_rewards.append(rewards)
@@ -494,7 +500,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "./models/73000/model.ckpt"
+    load_path = "./models/3000/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -504,7 +510,7 @@ def play(policy, env):
     while done == False:
         boom += 1
         # Get the action
-        actions, values, = model.step(obs,0)
+        actions, values,entropy = model.step(obs,0)
         print("action is",actions)
 
 
