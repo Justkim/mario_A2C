@@ -276,8 +276,8 @@ class Runner(AbstractEnvRunner):
 
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
 
-            if flag.DEBUG:
-                self.env.render()
+            #if flag.DEBUG:
+                #self.env.render()
 
 
             mb_rewards.append(rewards)
@@ -515,7 +515,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "./models/3000/model.ckpt"
+    load_path = "./models/3250/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play

@@ -85,7 +85,7 @@ class A2CPolicy(object):
             # self.pd, self.pi = self.pdtype.pdfromlatent(fc_common, init_scale=0.01)
             if flag.LAST_LAYER_IMPL:
                 self.p_layer = tf.layers.dense(inputs=self.fc_common,
-                                               units=7,
+                                               units=5,
                                                activation=tf.nn.elu,
                                                kernel_initializer=tf.contrib.layers.variance_scaling_initializer(), name="p_layer"
                                                )
