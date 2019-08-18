@@ -528,6 +528,8 @@ def play(policy, env):
         # Get the action
         actions, values,entropy = model.step(obs,0)
         print("action is",actions)
+        print("entropy",entropy)
+        print("pi",pi)
 
 
         # Take actions in env and look the results

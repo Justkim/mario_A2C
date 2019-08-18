@@ -6,7 +6,7 @@ import os
 import flag
 import model
 import architecture as policies
-import moving_dot_env as env
+import mario_env as env
 
 # SubprocVecEnv creates a vector of n environments to run them simultaneously.
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
@@ -53,7 +53,7 @@ def main():
                             ent_coef=0.05,
                             lr = 2e-4,
                             max_grad_norm = 0.5,
-                            log_interval = 5,
+                            log_interval = 10,
                             save_interval=50,decay_rate=0.001
                             )
 
