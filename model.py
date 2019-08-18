@@ -150,7 +150,8 @@ class Model(object):
         # For instance zip(ABCD, xyza) => Ax, By, Cz, Da
 
         # 3. Build our trainer
-        trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
+        #trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
+        trainer=tf.train.AdamOptimizer(learning_rate=lr_,beta1=0.9,beta2=0.999,epsilon=1e-08,use_locking=False,name='Adam')
 
         # 4. Backpropagation
 
@@ -515,7 +516,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "./models/3250/model.ckpt"
+    load_path = "./models/250/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
