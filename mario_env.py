@@ -129,23 +129,23 @@ class AllowBacktracking(gym.Wrapper):
         # rew = max(0, self._cur_x - self._max_x)
         # self._max_x = max(self._max_x, self._cur_x)
         # # print("real reward",rew)
-        stuck_flag =True
+        if flag.STUCK_REWARD:
+          stuck_flag =True
+          if (len(self.reward_q) == 10):
+              self.reward_q.popleft()
+          self.reward_q.append(rew)
+
+          for i in list(self.reward_q):
+
+              if i > -0.01:
+                  stuck_flag = False
+          if stuck_flag:
+              rew = rew - 1.01
 
 
 
         rew=(rew) /15  - 0.01
-       # rew=(rew) /15 -1
-        # rew=rew - 1
-        if(len(self.reward_q)==10):
-            self.reward_q.popleft()
-        self.reward_q.append(rew)
 
-        for i in list(self.reward_q):
-
-            if i > -0.01:
-                stuck_flag = False
-        if stuck_flag:
-            rew=rew - 1.01
 
         return obs,rew, done, info
 
@@ -280,6 +280,7 @@ def make_test():
 
     # Stack 4 frames
     env = FrameStack(env, 6)
+
 
     # Allow back tracking that helps agents are not discouraged too heavily
     # from exploring backwards if there is no way to advance

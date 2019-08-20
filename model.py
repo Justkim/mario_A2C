@@ -411,8 +411,8 @@ def learn(policy,
 
     # Load the model
     # If you want to continue training
-    #load_path = "./models/300/model.ckpt"
-    #model.load(load_path)
+    load_path = "/home/kim/mario_A2C/github_models/marioPPO_ b3e81c8f9c54bd301f12696d72c234a32c9ded65/1000/model.ckpt"
+    model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
     # Start total timer
@@ -516,7 +516,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "./models/250/model.ckpt"
+    load_path = "/home/kim/mario_A2C/github_models/marioPPO_ b3e81c8f9c54bd301f12696d72c234a32c9ded65/1000/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -529,7 +529,7 @@ def play(policy, env):
         actions, values,entropy = model.step(obs,0)
         print("action is",actions)
         print("entropy",entropy)
-        print("pi",pi)
+        #print("pi",pi)
 
 
         # Take actions in env and look the results
@@ -543,9 +543,11 @@ def play(policy, env):
         # print("steps", boom)
 
         score += rewards
+        cv2.waitKey(0)
+        x=input()
         env.render()
         time.sleep(0.03)
-        # cv2.waitKey(0)
+
 
 
     print("Score ", score)
