@@ -279,6 +279,7 @@ class Runner(AbstractEnvRunner):
 
             #if flag.DEBUG:
                 #self.env.render()
+            self.env.render()
 
 
             mb_rewards.append(rewards)
