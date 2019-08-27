@@ -412,7 +412,7 @@ def learn(policy,
 
     # Load the model
     # If you want to continue training
-    #load_path = "/home/kim/mario_A2C/github_models/marioPPO_ b3e81c8f9c54bd301f12696d72c234a32c9ded65/1000/model.ckpt"
+    #load_path = "./models/7900/model.ckpt"
     #model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
@@ -516,8 +516,8 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    #load_path = "/home/kim/mario_A2C/models/NoAdditionalActions_3c2d1b72fcccc1026ed4e75ec2c38e0caffd072c/500/model.ckpt"
-    load_path = "/home/kim/mario_A2C/github_models/marioPPO_ b3e81c8f9c54bd301f12696d72c234a32c9ded65/1000/model.ckpt"
+    load_path = "/home/kim/mario_A2C/github_models/4-marioPPO_f916e7e0a7511820d1a7b02de42f633d992fcef6/21500/model.ckpt"
+    #load_path = "./models/7900/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -545,7 +545,7 @@ def play(policy, env):
 
         score += rewards
         cv2.waitKey(0)
-        x=input()
+        #x=input()
         env.render()
         time.sleep(0.03)
 
