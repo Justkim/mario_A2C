@@ -50,7 +50,7 @@ def main():
                             gamma=0.99,
                             lam = 0.95,
                             vf_coef=0.5,
-                            ent_coef=0.008,
+                            ent_coef=0.002,
                             lr = 2.5e-4,
                             max_grad_norm = 0.5,
                             log_interval = 10,
