@@ -142,8 +142,12 @@ class AllowBacktracking(gym.Wrapper):
                   stuck_flag = False
           if stuck_flag:
               rew = rew - 1.01
+        #print(rew)
 
         rew+=y_pos
+        #print("y_pos",y_pos)
+        rew=rew-79
+        #print(rew)
 
         rew=(rew) /15
 
