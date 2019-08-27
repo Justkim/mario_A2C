@@ -124,6 +124,7 @@ class AllowBacktracking(gym.Wrapper):
 
     def step(self, action):  # pylint: disable=E0202
         obs, rew, done, info = self.env.step(action)
+        y_pos=info['y_pos']
         # print("rew",rew)
         # self._cur_x += rew
         # rew = max(0, self._cur_x - self._max_x)
@@ -142,9 +143,10 @@ class AllowBacktracking(gym.Wrapper):
           if stuck_flag:
               rew = rew - 1.01
 
+        rew+=y_pos
 
+        rew=(rew) /15
 
-        rew=(rew) /15  - 0.01
 
 
         return obs,rew, done, info
@@ -298,7 +300,8 @@ import time
 # new_env.reset()
 # for i in range(0,80):
 #
-#     # new_env.step()
+#     a,b,c,d=new_env.step(2)
+#     print("reward is", b)
 #     new_env.render()
 #
 #     time.sleep(0.05)
