@@ -151,7 +151,7 @@ class Model(object):
 
         # 3. Build our trainer
         #trainer = tf.train.RMSPropOptimizer(learning_rate=lr_, decay=0.99, epsilon=1e-5)
-        trainer=tf.train.AdamOptimizer(learning_rate=lr_,beta1=0.9,beta2=0.999,epsilon=1e-08,use_locking=False,name='Adam')
+        trainer=tf.train.AdamOptimizer(learning_rate=lr_,epsilon=1e-05,use_locking=False,name='Adam')
 
         # 4. Backpropagation
 

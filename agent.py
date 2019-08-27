@@ -51,7 +51,7 @@ def main():
                             lam = 0.95,
                             vf_coef=0.5,
                             ent_coef=0.008,
-                            lr = 2e-4,
+                            lr = 2.5e-4,
                             max_grad_norm = 0.5,
                             log_interval = 10,
                             save_interval=100,decay_rate=0.001
