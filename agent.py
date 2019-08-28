@@ -35,9 +35,9 @@ def main():
 
     else:
 
- #       made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, #env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, #env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0])
-        made_env = SubprocVecEnv([env.make_train_0,env.make_train_0])
-        nsteps=128
+        made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, #env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, #env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0])
+        #made_env = SubprocVecEnv([env.make_train_0])
+        nsteps=8
 
 
 

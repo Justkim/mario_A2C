@@ -367,7 +367,7 @@ def learn(policy,
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 256
+        nminibatches = 4
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
@@ -516,7 +516,7 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "/home/kim/mario_A2C/github_models/4-marioPPO_f916e7e0a7511820d1a7b02de42f633d992fcef6/21500/model.ckpt"
+    load_path = "/home/kim/mario_A2C/github_models/8-marioPPO/100/model.ckpt"
     #load_path = "./models/7900/model.ckpt"
     model.load(load_path)
     obs = env.reset()
@@ -527,9 +527,10 @@ def play(policy, env):
     while done == False:
         boom += 1
         # Get the action
-        actions, values,entropy = model.step(obs,0)
+        actions, values,entropy,pi = model.step(obs,0)
         print("action is",actions)
-        print("entropy",entropy)
+        print("cross_entropy",entropy)
+        print("pi",pi)
         #print("pi",pi)
 
 
