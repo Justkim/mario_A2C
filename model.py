@@ -250,7 +250,7 @@ class Runner(AbstractEnvRunner):
         for n in range(self.nsteps):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
-            actions, values , neglogpacs = self.model.step(self.obs, epsilon)
+            actions, values , neglogpacs,pi = self.model.step(self.obs, epsilon)
             #random = np.random.random_sample()
 
             #if (random < epsilon):
