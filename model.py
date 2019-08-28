@@ -352,7 +352,7 @@ def learn(policy,
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 16
+        nminibatches = 32
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
