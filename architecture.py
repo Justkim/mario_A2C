@@ -45,7 +45,7 @@ class A2CPolicy(object):
         # we will use to distribute action in our stochastic policy (in our case DiagGaussianPdType
         # aka Diagonal Gaussian, 3D normal distribution
 
-        self.pdtype = dp.CategoricalPdType(7)
+
 
 
         height, weight, channel = ob_space.shape
@@ -92,16 +92,24 @@ class A2CPolicy(object):
                 self.p_layer=(tf.maximum((self.p_layer), 1e-9))
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
                 self.dist = tf.distributions.Categorical(logits=self.p_layer)
+                #self.dist=tf.contrib.distributions.MultivariateNormalDiag(logits=self.p_layer)
 
 
 
             #
-                a0=self.dist.sample()
+                #a0=self.dist.sample()
+                a0=tf.argmax(self.softmax_layer,axis = 1)
+                #print(a0.shape)nmini
                 self.neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.p_layer, labels=a0)
             else:
-                self.pdtype = make_pdtype(action_space)
+                self.pdtype = dp.DiagGaussianPdType(7)
+                #self.pdtype = make_pdtype(action_space)
                 self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
                 a0 = self.pd.sample()
+                print(self.pi.shape)
+                print(a0)
+                self.neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.pi, labels=a0)
+
 
 
             #random = tf.random_uniform(shape=(),dtype=tf.float32)
@@ -139,7 +147,7 @@ class A2CPolicy(object):
         def step(state_in,epsilon, *_args, **_kwargs):
 
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
-            actions,value,neglogpac = sess.run([a0,vf, self.neglogpac], {inputs_: state_in,epsilon_:epsilon})
+            actions,value,neglogpac,pi = sess.run([a0,vf, self.neglogpac,self.softmax_layer], {inputs_: state_in,epsilon_:epsilon})
 
 
 
@@ -165,7 +173,7 @@ class A2CPolicy(object):
 
 
 
-            return actions, value,neglogpac
+            return actions, value,neglogpac,pi
 
         # Function that calculates only the V(s)
         def value(state_in, *_args, **_kwargs):
