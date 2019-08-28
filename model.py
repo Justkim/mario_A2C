@@ -367,7 +367,7 @@ def learn(policy,
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 4
+        nminibatches = 32
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
@@ -516,8 +516,8 @@ def play(policy, env):
                   max_grad_norm=0)
 
     # Load the model
-    load_path = "/home/kim/mario_A2C/github_models/8-marioPPO/100/model.ckpt"
-    #load_path = "./models/7900/model.ckpt"
+    #load_path = "/home/kim/mario_A2C/github_models/8-marioPPO/100/model.ckpt"
+    load_path = "./models/120/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
