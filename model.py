@@ -261,9 +261,9 @@ class Runner(AbstractEnvRunner):
             #print("lalalala")
 
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
-            rewards=rewards+ 0.1 *entropy
+            #rewards=rewards+ 0.1 *entropy
             #print("ATT",entropy)
-            self.env.render()
+            #self.env.render()
 
 
             mb_rewards.append(rewards)
@@ -350,7 +350,7 @@ def learn(policy,
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 1
+        nminibatches = 16
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
