@@ -262,7 +262,7 @@ class Runner(AbstractEnvRunner):
 
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
             rewards=rewards+ 0.1 *entropy
-            print("ATT",entropy)
+            #print("ATT",entropy)
             self.env.render()
 
 

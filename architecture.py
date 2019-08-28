@@ -96,7 +96,8 @@ class A2CPolicy(object):
 
 
             #
-                a0=self.dist.sample()
+               # a0=self.dist.sample()
+                a0 = tf.argmax(self.softmax_layer, axis=1)
             else:
                 self.pdtype = make_pdtype(action_space)
                 self.pd, self.pi = self.pdtype.pdfromlatent(self.fc_common, init_scale=0.01)
