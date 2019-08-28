@@ -96,10 +96,11 @@ class A2CPolicy(object):
 
 
 
-            #
-                #a0=self.dist.sample()
-                a0=tf.argmax(self.softmax_layer,axis = 1)
-                #print(a0.shape)nmini
+                if not flag.USE_ARGMAX:
+                    a0=self.dist.sample()
+                else:
+                    a0=tf.argmax(self.softmax_layer,axis = 1)
+
                 self.neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.p_layer, labels=a0)
             else:
                 self.pdtype = dp.DiagGaussianPdType(7)

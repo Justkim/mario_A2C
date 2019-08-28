@@ -363,16 +363,16 @@ def learn(policy,
           max_grad_norm,
           log_interval,save_interval,decay_rate):
 
-    noptepochs = 4
+
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 32
+        nminibatches = 8
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
     else:
-        noptepochs = 3
+        noptepochs = 4
 
     # noptepochs = 1
     # nminibatches = 1

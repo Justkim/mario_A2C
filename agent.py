@@ -37,7 +37,7 @@ def main():
 
         made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0,env.make_train_0])
         #made_env = SubprocVecEnv([env.make_train_0])
-        nsteps=128
+        nsteps=256
 
 
 
@@ -55,7 +55,7 @@ def main():
                             lr = 1e-4,
                             max_grad_norm = 0.5,
                             log_interval = 10,
-                            save_interval=20,decay_rate=0.001
+                            save_interval=10,decay_rate=0.001
                             )
 
 if __name__ == '__main__': #this is important.why?
