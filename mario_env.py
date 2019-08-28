@@ -143,12 +143,9 @@ class AllowBacktracking(gym.Wrapper):
           if stuck_flag:
               rew = rew - 1.01
         #print(rew)
-
-        rew+=y_pos
-        #print("y_pos",y_pos)
-        rew=rew-79
-        #print(rew)
-
+        if flag.Y_POS_REWARD:
+            rew+=y_pos
+            rew=rew-79
         rew=(rew) /15
 
 
@@ -165,7 +162,7 @@ def make_env(env_idx):
     # Make the environment
 
 
-    levelList = ['SuperMarioBros-1-1-v2','SuperMarioBros-2-1-v0','SuperMarioBros-3-1-v0','SuperMarioBros-4-1-v0','SuperMarioBros-5-1-v0','SuperMarioBros-6-1-v0','SuperMarioBros-7-1-v0','SuperMarioBros-8-1-v0']
+    levelList = ['SuperMarioBros-2-1-v2','SuperMarioBros-2-1-v0','SuperMarioBros-3-1-v0','SuperMarioBros-4-1-v0','SuperMarioBros-5-1-v0','SuperMarioBros-6-1-v0','SuperMarioBros-7-1-v0','SuperMarioBros-8-1-v0']
 
 
     # record_path = "./records/" + dicts[env_idx]['state']

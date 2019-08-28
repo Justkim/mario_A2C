@@ -517,7 +517,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/github_models/8-marioPPO/100/model.ckpt"
-    load_path = "./models/120/model.ckpt"
+    load_path = "./models/60/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
