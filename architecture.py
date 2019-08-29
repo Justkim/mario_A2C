@@ -89,7 +89,7 @@ class A2CPolicy(object):
                                                activation=tf.nn.elu,
                                                kernel_initializer=tf.contrib.layers.variance_scaling_initializer(), name="p_layer"
                                                )
-                self.p_layer=(tf.maximum((self.p_layer), 1e-9))
+                self.p_layer=(tf.maximum((self.p_layer), 1e-13))
                 self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
                 self.dist = tf.distributions.Categorical(logits=self.p_layer)
                 #self.dist=tf.contrib.distributions.MultivariateNormalDiag(logits=self.p_layer)
