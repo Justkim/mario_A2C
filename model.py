@@ -251,6 +251,10 @@ class Runner(AbstractEnvRunner):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values , neglogpacs,pi = self.model.step(self.obs, epsilon)
+            if flag.DEBUG:
+                print("action choosen is",actions)
+                print("value predicted is",values)
+                print("neglogpac from last train is",neglogpacs)
             #random = np.random.random_sample()
 
             #if (random < epsilon):
@@ -277,8 +281,8 @@ class Runner(AbstractEnvRunner):
 
             self.obs[:], rewards, self.dones, _ = self.env.step(actions)
 
-            #if flag.DEBUG:
-                #self.env.render()
+            if flag.DEBUG:
+                self.env.render()
             #self.env.render()
 
 
@@ -329,12 +333,19 @@ class Runner(AbstractEnvRunner):
             if flag.DEBUG:
                 print("REWARD", mb_rewards[t])
                 print("VALUE",mb_values[t])
+                print("NEXT_VALUE",nextvalues)
+
 
 
             delta = mb_rewards[t] + self.gamma * nextvalues * nextnonterminal - mb_values[t]
+            if flag.DEBUG:
+                print("DELTA",delta)
+
 
             # Advantage = delta + gamma *  λ (lambda) * nextnonterminal  * lastgaelam
             mb_advantages[t] = lastgaelam = delta + self.gamma * self.lam * nextnonterminal * lastgaelam
+            if flag.DEBUG:
+                print("ADV",mb_advantages[t])
             # mb_advantages[t] = lastgaelam = delta
 
         # Returns
@@ -517,7 +528,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/github_models/8-marioPPO/100/model.ckpt"
-    load_path = "./models/60/model.ckpt"
+    load_path = "/home/kim/mario_A2C/github_models/14-marioPPO_2f15cf219940601c87dadd301f425563a60d047e/270/270/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
