@@ -162,7 +162,7 @@ def make_env(env_idx):
     # Make the environment
 
 
-    levelList = ['SuperMarioBros-2-1-v2','SuperMarioBros-2-1-v0','SuperMarioBros-3-1-v0','SuperMarioBros-4-1-v0','SuperMarioBros-5-1-v0','SuperMarioBros-6-1-v0','SuperMarioBros-7-1-v0','SuperMarioBros-8-1-v0']
+    levelList = ['SuperMarioBros-1-1-v2','SuperMarioBros-2-1-v0','SuperMarioBros-3-1-v0','SuperMarioBros-4-1-v0','SuperMarioBros-5-1-v0','SuperMarioBros-6-1-v0','SuperMarioBros-7-1-v0','SuperMarioBros-8-1-v0']
 
 
     # record_path = "./records/" + dicts[env_idx]['state']
@@ -180,7 +180,7 @@ def make_env(env_idx):
 
 
     # Stack 4 frames
-    env = FrameStack(env, 6)
+    env = FrameStack(env, 4)
 
     # Allow back tracking that helps agents are not discouraged too heavily
     # from exploring backwards if there is no way to advance
