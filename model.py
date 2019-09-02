@@ -283,7 +283,7 @@ class Runner(AbstractEnvRunner):
 
             if flag.DEBUG:
                 self.env.render()
-            #self.env.render()
+            self.env.render()
 
 
             mb_rewards.append(rewards)
@@ -528,7 +528,7 @@ def play(policy, env):
 
     # Load the model
     #load_path = "/home/kim/mario_A2C/github_models/8-marioPPO/100/model.ckpt"
-    load_path = "/home/kim/mario_A2C/github_models/14-marioPPO_2f15cf219940601c87dadd301f425563a60d047e/270/270/model.ckpt"
+    load_path = "/home/kim/mario_A2C/github_models/16_pitfallPPO_c61e5315a0ab76df3b601ecf0a6257b76a751e33/560/model.ckpt"
     model.load(load_path)
     obs = env.reset()
     # Play
@@ -558,7 +558,7 @@ def play(policy, env):
         score += rewards
         cv2.waitKey(0)
         #x=input()
-        env.render()
+        #env.render()
         time.sleep(0.03)
 
 
