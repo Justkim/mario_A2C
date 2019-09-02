@@ -6,7 +6,7 @@ import os
 import flag
 import model
 import architecture as policies
-import mario_env as env
+import pitfall_env as env
 
 # SubprocVecEnv creates a vector of n environments to run them simultaneously.
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv

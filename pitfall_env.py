@@ -44,16 +44,16 @@ class PreprocessFrame(gym.ObservationWrapper):
     def observation(self, frame):
         # Set frame to gray
 
-        #frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
         # Resize the frame to 96x print(frame)96x1
-        # frame = frame[35: , :,None]
+        frame = frame[35:187 , 10:,None]
 
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
         frame = frame[:, :, None]
         # if flag.DEBUG:
-        #     cv2.imshow("frame",frame)
-        #     cv2.waitKey(0)
+        #cv2.imshow("frame",frame)
+        #cv2.waitKey(0)
         return frame
 
 class ActionsDiscretizer(gym.ActionWrapper):
@@ -100,8 +100,7 @@ class RewardScaler(gym.RewardWrapper):
     """
     def reward(self, reward):
 
-
-        return reward
+        return reward/10
 
 
 class AllowBacktracking(gym.Wrapper):
@@ -169,13 +168,13 @@ def make_env(env_idx):
 
     # record_path = "./records/" + dicts[env_idx]['state']
     #env = gym_super_mario_bros.make(levelList[env_idx])
-    env = gym.make("Pitfall-ram-v0")
+    env = gym.make("Pitfall-v0")
 
     #SuperMarioBros-v0
     #SuperMarioBrosRandomStages
    # env = BinarySpaceToDiscreteSpaceEnv(env,RIGHT_ONLY)
 
-    # env = RewardScaler(env)
+    env = RewardScaler(env)
 
     # PreprocessFrame
     env = PreprocessFrame(env)
@@ -291,7 +290,6 @@ def make_test():
     # from exploring backwards if there is no way to advance
     # head-on in the level.
     # env = AllowBacktracking(env)
-
     return env
 import time
 
@@ -299,17 +297,18 @@ import time
 
 
 #
-new_env=make_env(0)
-new_env.reset()
-print(new_env.action_space)
-
-for i in range(0,80):
-
-    a,b,c,d=new_env.step(new_env.action_space.sample())
-    print("reward is", b)
-    new_env.render()
-
-    time.sleep(0.05)
+# new_env=make_env(0)
+# new_env.reset()
+# print(new_env.action_space)
+# episode_reward=0
+# while True:
+#     print(new_env.action_space.sample())
+#     a,b,c,d=new_env.step(new_env.action_space.sample())
+#     print("reward is", b)
+#     episode_reward += b
+#     new_env.render()
+#     print(episode_reward)
+#     time.sleep(0.05)
 
 #
 # while True:
