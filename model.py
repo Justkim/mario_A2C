@@ -230,13 +230,13 @@ class Runner(AbstractEnvRunner):
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
             actions, values = self.model.step(self.obs, epsilon)
 
-            random=np.random.random_sample()
+            # random=np.random.random_sample()
+            #
+            # if(random<epsilon):
+            #
+            #     random_index=np.random.randint(7, size=12)
+            #     actions=random_index
 
-            if(random<epsilon):
-
-                random_index=np.random.randint(7, size=12)
-                actions=random_index
-            print("ACTIONS ARE",actions)
                 #print("RANDOM ACTION")
             #if flag.DEBUG:
                 #step_num_to_name(actions)
@@ -254,10 +254,16 @@ class Runner(AbstractEnvRunner):
             # Append the dones situations into the mb
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
-            #print("lalalala")
-            self.obs[:], rewards, self.dones, _ = self.env.step(actions)
-            #print("too much la will kill you")
-            #self.env.render()
+            if flag.ACTION_REPEAT:
+                obs1, rewards1, done1, _ = self.env.step(actions)
+                obs2, rewards2, done2, _ = self.env.step(actions)
+                self.obs[:], rewards3, self.dones, _ = self.env.step(actions)
+
+                rewards=rewards1+rewards2+rewards3
+            else:
+                self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+
+
 
 
             mb_rewards.append(rewards)
@@ -344,12 +350,12 @@ def learn(policy,
     if flag.ON_DESKTOP:
         nminibatches = 1 #8
     else:
-        nminibatches = 1
+        nminibatches = 8
 
     if flag.ON_DESKTOP:
         noptepochs = 1  # 8
     else:
-        noptepochs = 4
+        noptepochs = 64
 
     # noptepochs = 1
     # nminibatches = 1
