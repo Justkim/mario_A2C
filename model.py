@@ -102,7 +102,7 @@ class Model(object):
 
         if flag.LAST_LAYER_IMPL:
 
-            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.connected_p_layer, labels=actions_)
+            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
         else:
             neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 

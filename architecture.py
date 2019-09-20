@@ -104,9 +104,9 @@ class A2CPolicy(object):
                                                )
 
                 self.p_layer=(tf.maximum((self.p_layer ), 1e-13))
-
-                self.connected_p_layer = tf.concat([self.p_layer, self.pre_actions_], 1)
-                self.softmax_layer = tf.nn.softmax(self.connected_p_layer, name="softmax")
+                if flag.CONCAT_LAYER:
+                    self.p_layer = tf.concat([self.p_layer, self.pre_actions_], 1)
+                self.softmax_layer = tf.nn.softmax(self.p_layer, name="softmax")
                 self.dist = tf.distributions.Categorical(logits=self.p_layer)
 
                 #self.dist=tf.contrib.distributions.MultivariateNormalDiag(logits=self.p_layer)
