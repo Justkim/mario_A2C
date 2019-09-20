@@ -283,8 +283,15 @@ class Runner(AbstractEnvRunner):
             # Append the dones situations into the mb
             mb_dones.append(self.dones)
             #print("lalalala")
+            if flag.ACTION_REPEAT:
+                obs1, rewards1, done1, _ = self.env.step(actions)
+                obs2, rewards2, done2, _ = self.env.step(actions)
+                self.obs[:], rewards3, self.dones, _ = self.env.step(actions)
 
-            self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+                rewards = rewards1 + rewards2 + rewards3
+            else:
+                self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+
 
             if flag.DEBUG:
                 self.env.render()
