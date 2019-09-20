@@ -41,22 +41,24 @@ class A2CPolicy(object):
         gain = np.sqrt(2)
 
 
-        # Based on the action space, will select what probability distribution type
-        # we will use to distribute action in our stochastic policy (in our case DiagGaussianPdType
-        # aka Diagonal Gaussian, 3D normal distribution
 
 
 
 
         height, weight, channel = ob_space.shape
+
         ob_shape = (height, weight, channel)
         epsilon_=tf.placeholder(tf.float32)
+
 
         # Create the input placeholder
         inputs_ = tf.placeholder(tf.float32, [None, *ob_shape], name="input")
 
+        self.pre_actions_=tf.placeholder(tf.float32,[None,7],name="pre_actions_")
+
         # Normalize the images
         scaled_images = tf.cast(inputs_, tf.float32) / 255.0
+
 
         """
         Build the model
@@ -69,10 +71,21 @@ class A2CPolicy(object):
         """
         with tf.variable_scope("model", reuse=reuse):
             conv1 = conv_layer(scaled_images, 32, 8, 4, gain)#8 8 4 32
+
             conv2 = conv_layer(conv1, 64, 4, 2, gain) #4 4 32 64
+
             conv3 = conv_layer(conv2, 64, 3, 1, gain)# 8 64 8 8
-            flatten1 = tf.layers.flatten(conv3,"FLAT") # 8 4096
-            self.fc_common = fc_layer(flatten1, 512,gain=gain,name1="FC512") # 8 512
+
+            self.flatten1 = tf.layers.flatten(conv3,"FLAT") # 8 4096
+
+            self.fc_common = fc_layer(self.flatten1, 512,gain=gain,name1="FC512")
+
+
+
+
+            # print_out=tf.print(self.fc_common,[self.fc_common],"fc_common")
+
+
 
             #
             # self.p_layer = tf.layers.dense(inputs=self.fc_common,
@@ -89,9 +102,13 @@ class A2CPolicy(object):
                                                activation=tf.nn.elu,
                                                kernel_initializer=tf.contrib.layers.variance_scaling_initializer(), name="p_layer"
                                                )
-                self.p_layer=(tf.maximum((self.p_layer), 1e-13))
-                self.softmax_layer=tf.nn.softmax(self.p_layer,name="softmax")
+
+                self.p_layer=(tf.maximum((self.p_layer ), 1e-13))
+
+                self.connected_p_layer = tf.concat([self.p_layer, self.pre_actions_], 1)
+                self.softmax_layer = tf.nn.softmax(self.connected_p_layer, name="softmax")
                 self.dist = tf.distributions.Categorical(logits=self.p_layer)
+
                 #self.dist=tf.contrib.distributions.MultivariateNormalDiag(logits=self.p_layer)
 
 
@@ -100,6 +117,8 @@ class A2CPolicy(object):
                     a0=self.dist.sample()
                 else:
                     a0=tf.argmax(self.softmax_layer,axis = 1)
+
+
 
                 self.neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.p_layer, labels=a0)
             else:
@@ -145,12 +164,15 @@ class A2CPolicy(object):
 
 
         # Function use to take a step returns action to take and V(s)
-        def step(state_in,epsilon, *_args, **_kwargs):
+        def step(state_in,epsilon,pre_actions, *_args, **_kwargs):
+
 
             # sl,action, value= sess.run([self.softmax_layer,a0, vf], {inputs_: state_in})
-            actions,value,neglogpac,pi = sess.run([a0,vf, self.neglogpac,self.softmax_layer], {inputs_: state_in,epsilon_:epsilon})
-
-
+            actions,value,neglogpac,pi,flatLayer ,inputs1= sess.run([a0,vf, self.neglogpac,self.softmax_layer,scaled_images,inputs_], {inputs_: state_in,epsilon_:epsilon,self.pre_actions_:pre_actions})
+            # print("action_shape",actions.shape)
+            # print("flatten",flatLayer.shape)
+            # print("sc",sc.shape)
+            # print("inputs",inputs1.shape)
 
 
 

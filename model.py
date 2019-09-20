@@ -101,10 +101,10 @@ class Model(object):
         # neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
 
         if flag.LAST_LAYER_IMPL:
-            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.p_layer, labels=actions_)
+
+            neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.connected_p_layer, labels=actions_)
         else:
             neglogpac = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=train_model.pi, labels=actions_)
-
 
         #neglogpac=train_model.pd.neglogp(actions_)
         ratio= tf.exp(old_neglogpac - neglogpac)
@@ -156,7 +156,7 @@ class Model(object):
         # 4. Backpropagation
 
         _train = trainer.apply_gradients(grads)
-        def train(states_in, actions, returns, values, neglogpac,lr):
+        def train(states_in, actions,pre_actions, returns, values, neglogpac,lr):
             # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
             # Returns = R + yV(s')
 
@@ -166,9 +166,11 @@ class Model(object):
             # print(actions_.shape)
             # exit
 
+
             # We create the feed dictionary
             td_map = {train_model.inputs_: states_in,
                       actions_: actions,
+                      train_model.pre_actions_:pre_actions,
                       advantages_: advantages,  # Use to calculate our policy loss
                       rewards_: returns,  # Use as a bootstrap for real value
                       lr_: lr ,
@@ -176,7 +178,7 @@ class Model(object):
                       old_neglogpac: neglogpac ,
                       old_value : values}
             if flag.LAST_LAYER_IMPL:
-                pi1, policy_loss , value_loss, policy_entropy, _ = sess.run([train_model.softmax_layer,selected_pg_loss,selected_vf_loss, entropy, _train], td_map)
+                pi1, policy_loss , value_loss,policy_entropy, flatten, _ = sess.run([train_model.softmax_layer,selected_pg_loss,selected_vf_loss, entropy,train_model.flatten1, _train], td_map)
             else:
                 pi1, policy_loss , value_loss, policy_entropy, _ = sess.run(
                     [train_model.pi, selected_pg_loss ,selected_vf_loss, entropy, _train], td_map)
@@ -185,6 +187,7 @@ class Model(object):
                     print("pd",scipy.special.softmax(pi1))
                 else:
                     print("pd",pi1)
+
 
             #logger.record_tabular("neglog", neglogpac1)
             #logger.record_tabular("adv", advantages)
@@ -243,14 +246,16 @@ class Runner(AbstractEnvRunner):
         # Total timesteps taken
         self.total_timesteps = total_timesteps
 
-    def run(self,epsilon):
+    def run(self,epsilon,pre_actions):
         # Here, we init the lists that will contain the mb of experiences
+
+
         mb_obs, mb_actions, mb_rewards, mb_values, mb_dones , mb_neglogpacs = [], [], [], [], [],[]
         # For n in range number of steps
         for n in range(self.nsteps):
             # Given observations, take action and value (V(s))
             # We already have self.obs because AbstractEnvRunner run self.obs[:] = env.reset()
-            actions, values , neglogpacs,pi = self.model.step(self.obs, epsilon)
+            actions, values , neglogpacs,pi = self.model.step(self.obs, epsilon,[pre_actions[0]])
             if flag.DEBUG:
                 print("action choosen is",actions)
                 print("value predicted is",values)
@@ -283,7 +288,7 @@ class Runner(AbstractEnvRunner):
 
             if flag.DEBUG:
                 self.env.render()
-            #self.env.render()
+            self.env.render()
 
 
             mb_rewards.append(rewards)
@@ -427,17 +432,28 @@ def learn(policy,
     #model.load(load_path)
     # Instantiate the runner object
     runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
+    actions=np.full((batch_size,),0)
+
+
+
+
+
     # Start total timer
     tfirststart = time.time()
     epsilon=0.05
     for update in range(1, total_timesteps // batch_size + 1):
+        pre_actions = get_one_hot(actions,7)
         #print("1")
         # Start timer
         tstart = time.time()
+
+
         # Get minibatch
-        obs, actions, returns, values , neglogpacs = runner.run(epsilon)
+        obs, actions, returns, values , neglogpacs = runner.run(epsilon,pre_actions)
+
+
+
         #print("2")
-        #epsilon=epsilon-decay_rate
         # print("RUNNER")
         # print("action",actions)
         # print("action", actions)
@@ -449,6 +465,7 @@ def learn(policy,
         mb_losses = []
         total_batches_train = 0
 
+
         # Index of each element of batch_size
         # Create the indices array
         indices = np.arange(batch_size)
@@ -459,7 +476,7 @@ def learn(policy,
             for start in range(0, batch_size, batch_train_size):
                 end = start + batch_train_size
                 mbinds = indices[start:end]
-                slices = (arr[mbinds] for arr in (obs, actions, returns, values, neglogpacs))
+                slices = (arr[mbinds] for arr in (obs, actions, pre_actions, returns, values, neglogpacs))
                 mb_losses.append(model.train(*slices, lr))
 
         #print("--------------------------------------")
@@ -565,6 +582,11 @@ def play(policy, env):
 
     print("Score ", score)
     env.close()
+
+
+def get_one_hot(targets, nb_classes):
+    res = np.eye(nb_classes)[np.array(targets).reshape(-1)]
+    return res.reshape(list(targets.shape)+[nb_classes])
 
 
 def step_num_to_name(step):
