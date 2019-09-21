@@ -141,9 +141,9 @@ class Model(object):
 
         # 2. Calculate the gradients
         grads = tf.gradients(loss, params)
-        #if max_grad_norm is not None:
-            # Clip the gradients (normalize)
-            #grads, grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
+        if max_grad_norm is not None:
+            #Clip the gradients (normalize)
+            grads, grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
         grads = list(zip(grads, params))
 
         # zip aggregate each gradient with parameters associated
@@ -174,7 +174,7 @@ class Model(object):
                       advantages_: advantages,  # Use to calculate our policy loss
                       rewards_: returns,  # Use as a bootstrap for real value
                       lr_: lr ,
-                      clip_range: 0.1,
+                      clip_range: 0.2,
                       old_neglogpac: neglogpac ,
                       old_value : values}
             if flag.LAST_LAYER_IMPL:
@@ -234,7 +234,7 @@ class Runner(AbstractEnvRunner):
     - Make a mini batch
     """
 
-    def __init__(self, env, model, nsteps, total_timesteps, gamma, lam):
+    def __init__(self, env, model, nsteps, total_timesteps, gamma, lam,action_repeat_num):
         super().__init__(env=env, model=model, nsteps=nsteps)
 
         # Discount rate
@@ -245,6 +245,7 @@ class Runner(AbstractEnvRunner):
 
         # Total timesteps taken
         self.total_timesteps = total_timesteps
+        self.action_repeat_num=action_repeat_num
 
     def run(self,epsilon,pre_actions):
         # Here, we init the lists that will contain the mb of experiences
@@ -284,11 +285,11 @@ class Runner(AbstractEnvRunner):
             mb_dones.append(self.dones)
             #print("lalalala")
             if flag.ACTION_REPEAT:
-                obs1, rewards1, done1, _ = self.env.step(actions)
-                obs2, rewards2, done2, _ = self.env.step(actions)
-                self.obs[:], rewards3, self.dones, _ = self.env.step(actions)
-
-                rewards = rewards1 + rewards2 + rewards3
+                reward_sum=0
+                for i in range(0,self.action_repeat_num):
+                    self.obs[:], rewards, self.dones, _ = self.env.step(actions)
+                    reward_sum+=rewards
+                rewards = reward_sum
             else:
                 self.obs[:], rewards, self.dones, _ = self.env.step(actions)
 
@@ -355,7 +356,11 @@ class Runner(AbstractEnvRunner):
 
 
             # Advantage = delta + gamma *  λ (lambda) * nextnonterminal  * lastgaelam
-            mb_advantages[t] = lastgaelam = delta + self.gamma * self.lam * nextnonterminal * lastgaelam
+            if flag.USE_GAE:
+                mb_advantages[t] = lastgaelam = delta + self.gamma * self.lam * nextnonterminal * lastgaelam
+            else:
+                mb_advantages[t]=delta
+
             if flag.DEBUG:
                 print("ADV",mb_advantages[t])
             # mb_advantages[t] = lastgaelam = delta
@@ -384,7 +389,7 @@ def learn(policy,
           ent_coef,
           lr,
           max_grad_norm,
-          log_interval,save_interval,decay_rate):
+          log_interval,save_interval,decay_rate,action_repeat_num):
 
 
     if flag.ON_DESKTOP:
@@ -438,7 +443,7 @@ def learn(policy,
     #load_path = "./models/7900/model.ckpt"
     #model.load(load_path)
     # Instantiate the runner object
-    runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam)
+    runner = Runner(env, model, nsteps=nsteps, total_timesteps=total_timesteps, gamma=gamma, lam=lam,action_repeat_num=action_repeat_num)
     actions=np.full((batch_size,),0)
 
 
