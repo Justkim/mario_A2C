@@ -29,18 +29,17 @@ def main():
     flag.on_desktop=True
 
     if flag.ON_DESKTOP:
-        made_env = SubprocVecEnv([env.make_train_0,env.make_train_0])
-        nsteps=1
+        made_env = SubprocVecEnv([env.make_train_0])
+        nsteps=16
+
 
 
     else:
 
-        made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0])
-        nsteps=128
-
-
-
-
+        # made_env=SubprocVecEnv([env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0, env.make_train_0])
+        # nsteps=128
+        made_env = SubprocVecEnv([env.make_train_0])
+        nsteps = 16
 
     with tf.Session(config=config):
         model.learn(policy=policies.A2CPolicy,
@@ -54,7 +53,7 @@ def main():
                             lr = 2e-4,
                             max_grad_norm = 0.5,
                             log_interval = 5,
-                            save_interval=50,decay_rate=0.001
+                            save_interval=100,decay_rate=0.001
                             )
 
 if __name__ == '__main__': #this is important.why?

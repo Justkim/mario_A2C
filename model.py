@@ -172,7 +172,7 @@ class Model(object):
                       advantages_: advantages,  # Use to calculate our policy loss
                       rewards_: returns,  # Use as a bootstrap for real value
                       lr_: lr ,
-                      clip_range: 0.1,
+                      clip_range: 0.2,
                       old_neglogpac: neglogpac ,
                       old_value : values}
             if flag.LAST_LAYER_IMPL:
@@ -369,7 +369,7 @@ def learn(policy,
         nminibatches = 8
 
     if flag.ON_DESKTOP:
-        noptepochs = 1  # 8
+        noptepochs = 4  # 8
     else:
         noptepochs = 4
 

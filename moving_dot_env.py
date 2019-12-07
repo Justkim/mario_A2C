@@ -4,10 +4,6 @@ import gym_moving_dot
 # https://github.com/aborghi/retro_contest_agent/blob/master/fastlearner/ppo2ttifrutti_sonic_env.py
 import numpy as np
 import gym
-from nes_py.wrappers import BinarySpaceToDiscreteSpaceEnv
-import gym_super_mario_bros
-from gym_super_mario_bros.actions import RIGHT_ONLY
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from baselines.common.atari_wrappers import FrameStack
 import flag
 import collections
